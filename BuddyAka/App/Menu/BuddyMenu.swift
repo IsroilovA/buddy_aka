@@ -5,7 +5,6 @@ struct BuddyMenu: View {
     @Environment(OnboardingState.self) private var onboarding
     @Environment(SessionCoordinator.self) private var session
     @Environment(SettingsRoute.self) private var settingsRoute
-    @Environment(BuddySettings.self) private var buddySettings
     @Environment(\.openSettings) private var openSettings
     @Environment(\.openWindow) private var openWindow
 
@@ -50,8 +49,7 @@ struct BuddyMenu: View {
                     settingsRoute.selectedTab = .apiKey
                     WindowPresenter.showSettings(using: openSettings)
                 }
-            ),
-            initialLessonID: buddySettings.selectedLessonID
+            )
         )
         if session.lastError != nil {
             WindowPresenter.showMainWindow(using: openWindow)

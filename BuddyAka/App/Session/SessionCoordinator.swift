@@ -320,6 +320,7 @@ final class SessionCoordinator {
         lessonWalker = nil
         dispatcher.reset()
         guidance.reset()
+        turnContext = ModelTurnContext()
         overlay.hide()
     }
 

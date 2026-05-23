@@ -89,8 +89,7 @@ extension BuddyAkaApp {
             openSettings: openSettings,
             session: session,
             onboarding: onboarding,
-            settingsRoute: settingsRoute,
-            buddySettings: buddySettings
+            settingsRoute: settingsRoute
         )
     }
 }

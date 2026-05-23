@@ -9,7 +9,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var session: SessionCoordinator?
     private var onboarding: OnboardingState?
     private var settingsRoute: SettingsRoute?
-    private var buddySettings: BuddySettings?
     private var shortcutRegistered = false
 
     func bind(
@@ -17,15 +16,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         openSettings: OpenSettingsAction,
         session: SessionCoordinator,
         onboarding: OnboardingState,
-        settingsRoute: SettingsRoute,
-        buddySettings: BuddySettings
+        settingsRoute: SettingsRoute
     ) {
         self.openWindow = openWindow
         self.openSettings = openSettings
         self.session = session
         self.onboarding = onboarding
         self.settingsRoute = settingsRoute
-        self.buddySettings = buddySettings
 
         guard !shortcutRegistered else { return }
         shortcutRegistered = true
@@ -67,8 +64,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                             WindowPresenter.showSettings(using: os)
                         }
                     }
-                ),
-                initialLessonID: buddySettings?.selectedLessonID
+                )
             )
             if session.lastError != nil {
                 WindowPresenter.showMainWindow(using: openWindow)
