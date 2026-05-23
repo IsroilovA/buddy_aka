@@ -118,12 +118,12 @@ struct OutboundEncodingTests {
     @Test("PersonaPrompt always includes lesson protocol section")
     func personaPromptLessonProtocol() {
         let prompt = PersonaPrompt.compose(PersonaContext(language: .en))
-        #expect(prompt.contains("LESSON MODE"))
+        #expect(prompt.contains("LESSONS"))
         #expect(prompt.contains("list_lessons"))
         #expect(prompt.contains("start_lesson"))
         #expect(prompt.contains("advance_lesson_step"))
         #expect(prompt.contains("lesson_step_advanced"))
-        #expect(prompt.contains("GUIDELINE, not a script"))
+        #expect(prompt.contains("SOURCE OF TRUTH"))
     }
 
     @Test("realtimeInput envelope base64-encodes audio with the right mime type")
