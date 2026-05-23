@@ -13,6 +13,7 @@ struct BuddyAkaApp: App {
     @State private var session: SessionCoordinator
     @State private var buddySettings: BuddySettings
     @State private var lessonStore: LessonStore
+    @State private var demoAnimator: DemoCursorAnimator
     @Environment(\.openWindow) private var openWindow
     @Environment(\.openSettings) private var openSettings
 
@@ -37,6 +38,7 @@ struct BuddyAkaApp: App {
         ))
         _buddySettings = State(initialValue: settings)
         _lessonStore = State(initialValue: store)
+        _demoAnimator = State(initialValue: DemoCursorAnimator(overlay: state))
     }
 
     var body: some Scene {
@@ -63,6 +65,7 @@ struct BuddyAkaApp: App {
                 .environment(settingsRoute)
                 .environment(buddySettings)
                 .environment(lessonStore)
+                .environment(demoAnimator)
         } label: {
             MenuBarLabel(
                 allGranted: permissions.allGranted,

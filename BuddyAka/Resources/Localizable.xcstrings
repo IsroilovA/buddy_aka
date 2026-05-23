@@ -815,6 +815,9 @@
         }
       }
     },
+    "Demo Cursor" : {
+
+    },
     "Denied" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2046,6 +2049,9 @@
           }
         }
       }
+    },
+    "Stop Demo Cursor" : {
+
     },
     "Stop Listening" : {
       "extractionState" : "manual",

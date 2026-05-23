@@ -7,6 +7,7 @@ struct BuddyMenu: View {
     @Environment(SettingsRoute.self) private var settingsRoute
     @Environment(\.openSettings) private var openSettings
     @Environment(\.openWindow) private var openWindow
+    @Environment(DemoCursorAnimator.self) private var demoAnimator
 
     var body: some View {
         if session.isActive {
@@ -19,6 +20,10 @@ struct BuddyMenu: View {
                 startSession()
             }
             .keyboardShortcut("b", modifiers: [.command, .shift])
+        }
+
+        Button(demoAnimator.active ? "Stop Demo Cursor" : "Demo Cursor") {
+            demoAnimator.toggle()
         }
 
         Button(String(localized: "Open BuddyAka")) {
