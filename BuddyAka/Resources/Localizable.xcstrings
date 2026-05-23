@@ -1,0 +1,1732 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Accessibility" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accessibility"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Универсальный доступ"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maxsus imkoniyatlar"
+          }
+        }
+      }
+    },
+    "Accessibility permission was revoked." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Accessibility permission was revoked." } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Разрешение универсального доступа было отозвано." } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "Maxsus imkoniyatlar ruxsati bekor qilingan." } }
+      }
+    },
+    "Add your Gemini API key" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add your Gemini API key"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добавьте ключ Gemini API"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gemini API kalitingizni qo‘shing"
+          }
+        }
+      }
+    },
+    "All set!" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All set!"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Готово!"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tayyor!"
+          }
+        }
+      }
+    },
+    "anywhere on your Mac." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "anywhere on your Mac."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "где угодно на вашем Mac."
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mac’ingizning istalgan joyida."
+          }
+        }
+      }
+    },
+    "API Key" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "API Key"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "API-ключ"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "API kalit"
+          }
+        }
+      }
+    },
+    "API key rejected" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "API key rejected" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "API-ключ отклонён" } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "API kalit rad etildi" } }
+      }
+    },
+    "Add your Gemini API key in Settings → API Key." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Add your Gemini API key in Settings → API Key." } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Добавьте Gemini API-ключ в Настройки → API-ключ." } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "Gemini API kalitingizni Sozlamalar → API kalit bo‘limiga qo‘shing." } }
+      }
+    },
+    "Appearance" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appearance"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Внешний вид"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ko‘rinishi"
+          }
+        }
+      }
+    },
+    "Ask in Uzbek, Russian or English." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ask in Uzbek, Russian or English."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Спрашивайте по-узбекски, по-русски или по-английски."
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O‘zbek, rus yoki ingliz tilida so‘rang."
+          }
+        }
+      }
+    },
+    "Audio and screen content only leave your Mac while a session is running." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audio and screen content only leave your Mac while a session is running."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Аудио и содержимое экрана покидают Mac только во время сессии."
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audio va ekran tarkibi faqat seans davomida Mac’ingizdan chiqadi."
+          }
+        }
+      }
+    },
+    "Audio setup failed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Audio setup failed" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Не удалось настроить аудио" } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "Audioni sozlab bo‘lmadi" } }
+      }
+    },
+    "Back" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Назад"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orqaga"
+          }
+        }
+      }
+    },
+    "Buddy" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buddy"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Помощник"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yordamchi"
+          }
+        }
+      }
+    },
+    "Buddy color" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buddy color"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Цвет помощника"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yordamchi rangi"
+          }
+        }
+      }
+    },
+    "BuddyAka" : {
+
+    },
+    "BuddyAka highlights the next button. You stay in control — it never clicks for you." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuddyAka highlights the next button. You stay in control — it never clicks for you."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuddyAka подсвечивает следующую кнопку. Управление остаётся за вами — он никогда не нажимает сам."
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuddyAka keyingi tugmani belgilab beradi. Boshqaruv sizda — u hech qachon o‘zi bosmaydi."
+          }
+        }
+      }
+    },
+    "BuddyAka is paused until these are granted. The screen returns automatically once you're set." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuddyAka is paused until these are granted. The screen returns automatically once you're set."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuddyAka на паузе, пока не выданы разрешения. Экран вернётся автоматически, как только всё будет готово."
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ushbu ruxsatlar berilmaguncha BuddyAka pauzada. Tayyor bo‘lganingizda ekran o‘zi qaytadi."
+          }
+        }
+      }
+    },
+    "BuddyAka is running. Click ✨ in the menu bar anytime." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuddyAka is running. Click ✨ in the menu bar anytime."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuddyAka запущен. Нажмите ✨ в строке меню в любой момент."
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuddyAka ishlamoqda. Istalgan vaqt menyu satridagi ✨ tugmasini bosing."
+          }
+        }
+      }
+    },
+    "BuddyAka shows you where to click on screen and explains each step in your language." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuddyAka shows you where to click on screen and explains each step in your language."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuddyAka показывает, куда нажимать на экране, и объясняет каждый шаг на вашем языке."
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuddyAka ekranda qayerga bosishni ko‘rsatadi va har bir qadamni o‘z tilingizda tushuntiradi."
+          }
+        }
+      }
+    },
+    "Cancel" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отмена"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bekor qilish"
+          }
+        }
+      }
+    },
+    "Connection lost" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Connection lost" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Соединение потеряно" } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "Ulanish uzildi" } }
+      }
+    },
+    "Connection lost: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Connection lost: %@" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Соединение потеряно: %@" } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "Ulanish uzildi: %@" } }
+      }
+    },
+    "Continue" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Продолжить"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Davom etish"
+          }
+        }
+      }
+    },
+    "Continue is enabled once all three are granted." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue is enabled once all three are granted."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«Продолжить» станет активной, когда все три разрешения будут выданы."
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uchchala ruxsat berilgach «Davom etish» faollashadi."
+          }
+        }
+      }
+    },
+    "Couldn't save: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't save: %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось сохранить: %@"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saqlab bo‘lmadi: %@"
+          }
+        }
+      }
+    },
+    "Couldn't start session" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Couldn't start session" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Не удалось начать сессию" } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "Seansni boshlab bo‘lmadi" } }
+      }
+    },
+    "Bring the app you want help with to the front, then start again." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Bring the app you want help with to the front, then start again." } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Выведите приложение, с которым нужна помощь, на передний план и запустите снова." } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "Yordam kerak bo‘lgan ilovani oldinga olib chiqing, keyin qayta boshlang." } }
+      }
+    },
+    "Couldn't initialize audio: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Couldn't initialize audio: %@" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Не удалось инициализировать аудио: %@" } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "Audioni ishga tushirib bo‘lmadi: %@" } }
+      }
+    },
+    "Couldn't read the Gemini API key from Keychain: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Couldn't read the Gemini API key from Keychain: %@" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Не удалось прочитать Gemini API-ключ из Связки ключей: %@" } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "Gemini API kalitini Keychain’dan o‘qib bo‘lmadi: %@" } }
+      }
+    },
+    "Couldn't reach Gemini: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Couldn't reach Gemini: %@" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Не удалось подключиться к Gemini: %@" } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "Gemini bilan bog‘lanib bo‘lmadi: %@" } }
+      }
+    },
+    "Couldn't start the Gemini session: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Couldn't start the Gemini session: %@" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Не удалось начать сессию Gemini: %@" } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "Gemini seansini boshlab bo‘lmadi: %@" } }
+      }
+    },
+    "Denied" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Denied"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отклонено"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rad etildi"
+          }
+        }
+      }
+    },
+    "Finish" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finish"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Готово"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tugatish"
+          }
+        }
+      }
+    },
+    "Gemini API Key" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gemini API Key"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "API-ключ Gemini"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gemini API kaliti"
+          }
+        }
+      }
+    },
+    "Gemini rejected the API key." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Gemini rejected the API key." } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Gemini отклонил API-ключ." } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "Gemini API kalitni rad etdi." } }
+      }
+    },
+    "Gemini rejected the API key: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Gemini rejected the API key: %@" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Gemini отклонил API-ключ: %@" } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "Gemini API kalitni rad etdi: %@" } }
+      }
+    },
+    "Gemini sent an unexpected response: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Gemini sent an unexpected response: %@" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Gemini вернул неожиданный ответ: %@" } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "Gemini kutilmagan javob qaytardi: %@" } }
+      }
+    },
+    "Grant" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grant"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Предоставить"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Berish"
+          }
+        }
+      }
+    },
+    "Grant permissions" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grant permissions"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выдайте разрешения"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ruxsatlarni bering"
+          }
+        }
+      }
+    },
+    "Grant the required permissions before starting BuddyAka." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Grant the required permissions before starting BuddyAka." } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Выдайте необходимые разрешения перед запуском BuddyAka." } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "BuddyAka’ni boshlashdan oldin kerakli ruxsatlarni bering." } }
+      }
+    },
+    "Granted" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Granted"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Предоставлено"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Berildi"
+          }
+        }
+      }
+    },
+    "How it works" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How it works"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Как это работает"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "U qanday ishlaydi"
+          }
+        }
+      }
+    },
+    "It points, you click." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "It points, you click."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Он указывает — вы нажимаете."
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "U ko‘rsatadi, siz bosasiz."
+          }
+        }
+      }
+    },
+    "Lets BuddyAka read what's on screen so it can point at things." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lets BuddyAka read what's on screen so it can point at things."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Позволяет BuddyAka читать содержимое экрана, чтобы указывать на элементы."
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuddyAka ekrandagi narsalarga ishora qila olishi uchun ekran tarkibini o‘qishi kerak."
+          }
+        }
+      }
+    },
+    "Look for ✨ in your menu bar. Press ⌘⇧B to start." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Look for ✨ in your menu bar. Press ⌘⇧B to start."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Найдите ✨ в строке меню. Нажмите ⌘⇧B, чтобы начать."
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menyu satrida ✨ ni toping. Boshlash uchun ⌘⇧B bosing."
+          }
+        }
+      }
+    },
+    "Microphone" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Microphone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Микрофон"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mikrofon"
+          }
+        }
+      }
+    },
+    "Missing API key" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Missing API key" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "API-ключ не указан" } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "API kalit yo‘q" } }
+      }
+    },
+    "Needed to capture the focused window for visual context." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Needed to capture the focused window for visual context."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нужно для снятия активного окна как визуального контекста."
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vizual kontekst uchun faol oynani olishga kerak."
+          }
+        }
+      }
+    },
+    "Network error" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Network error" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Ошибка сети" } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "Tarmoq xatosi" } }
+      }
+    },
+    "Not determined" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not determined"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не определено"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aniqlanmagan"
+          }
+        }
+      }
+    },
+    "OK" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "OK" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "OK" } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "OK" } }
+      }
+    },
+    "Open BuddyAka" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open BuddyAka"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открыть BuddyAka"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuddyAka’ni ochish"
+          }
+        }
+      }
+    },
+    "Open System Settings" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open System Settings"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открыть «Системные настройки»"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tizim sozlamalarini ochish"
+          }
+        }
+      }
+    },
+    "Or click the ✨ in your menu bar." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Or click the ✨ in your menu bar."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Или нажмите ✨ в строке меню."
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yoki menyu satridagi ✨ ni bosing."
+          }
+        }
+      }
+    },
+    "Paste your Gemini API key" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paste your Gemini API key"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вставьте ключ Gemini API"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gemini API kalitingizni joylang"
+          }
+        }
+      }
+    },
+    "Permissions" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permissions"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Разрешения"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ruxsatlar"
+          }
+        }
+      }
+    },
+    "Permissions needed to continue" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permissions needed to continue"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нужны разрешения для продолжения"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Davom etish uchun ruxsatlar kerak"
+          }
+        }
+      }
+    },
+    "Press the same shortcut again to dismiss." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Press the same shortcut again to dismiss."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нажмите тот же шорткат ещё раз, чтобы закрыть."
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yopish uchun shu kombinatsiyani yana bosing."
+          }
+        }
+      }
+    },
+    "Private by default." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Private by default."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Приватно по умолчанию."
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sukut bo‘yicha maxfiy."
+          }
+        }
+      }
+    },
+    "Quit BuddyAka" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quit BuddyAka"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выйти из BuddyAka"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuddyAka’dan chiqish"
+          }
+        }
+      }
+    },
+    "Ready" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ready"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Готово"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tayyor"
+          }
+        }
+      }
+    },
+    "Replay onboarding" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replay onboarding"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Повторить онбординг"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Onboardingni qayta ko‘rish"
+          }
+        }
+      }
+    },
+    "Reset to system accent" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reset to system accent"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сбросить до системного акцента"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tizim rangiga qaytarish"
+          }
+        }
+      }
+    },
+    "Restart" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restart"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Начать заново"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qaytadan boshlash"
+          }
+        }
+      }
+    },
+    "Restart the onboarding wizard?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restart the onboarding wizard?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запустить мастер онбординга заново?"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Onboarding ustasini qaytadan ishga tushirilsinmi?"
+          }
+        }
+      }
+    },
+    "Save" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сохранить"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saqlash"
+          }
+        }
+      }
+    },
+    "Saved ✓" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saved ✓"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сохранено ✓"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saqlandi ✓"
+          }
+        }
+      }
+    },
+    "Screen Recording" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Screen Recording"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запись экрана"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ekranni yozib olish"
+          }
+        }
+      }
+    },
+    "Settings…" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Настройки…"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sozlamalar…"
+          }
+        }
+      }
+    },
+    "Setup incomplete" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Setup incomplete"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Настройка не завершена"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sozlash tugallanmagan"
+          }
+        }
+      }
+    },
+    "Start Listening" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start Listening"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Начать прослушивание"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tinglashni boshlash"
+          }
+        }
+      }
+    },
+    "Stop (⌘⇧B)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop (⌘⇧B)"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Стоп (⌘⇧B)"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To‘xtatish (⌘⇧B)"
+          }
+        }
+      }
+    },
+    "Stop Listening" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop Listening"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Остановить прослушивание"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tinglashni to‘xtatish"
+          }
+        }
+      }
+    },
+    "Stored locally in your Keychain. Never sent anywhere except Google." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stored locally in your Keychain. Never sent anywhere except Google."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Хранится локально в вашей «Связке ключей». Никуда не отправляется, кроме Google."
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sizning Keychain’ingizda mahalliy saqlanadi. Google’dan boshqa joyga yuborilmaydi."
+          }
+        }
+      }
+    },
+    "Summon BuddyAka" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Summon BuddyAka"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вызов BuddyAka"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BuddyAka’ni chaqirish"
+          }
+        }
+      }
+    },
+    "The cursor and pulse ring use this color." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The cursor and pulse ring use this color."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Курсор и пульсирующее кольцо используют этот цвет."
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kursor va pulsatsiyalanuvchi halqa shu rangda bo‘ladi."
+          }
+        }
+      }
+    },
+    "Try it (⌘⇧B)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try it (⌘⇧B)"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Попробовать (⌘⇧B)"
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sinab ko‘rish (⌘⇧B)"
+          }
+        }
+      }
+    },
+    "Unexpected response" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Unexpected response" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Неожиданный ответ" } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "Kutilmagan javob" } }
+      }
+    },
+    "Used to hear your voice — audio never leaves your device unless you start a session." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Used to hear your voice — audio never leaves your device unless you start a session."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нужно, чтобы слышать ваш голос — аудио не покидает устройство без активной сессии."
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ovozingizni eshitish uchun — seans boshlanmaguncha audio qurilmangizdan chiqmaydi."
+          }
+        }
+      }
+    },
+    "You talk, BuddyAka listens." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You talk, BuddyAka listens."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вы говорите — BuddyAka слушает."
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Siz gapirasiz, BuddyAka tinglaydi."
+          }
+        }
+      }
+    },
+    "Your voice-guided onboarding buddy." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your voice-guided onboarding buddy."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ваш голосовой помощник по онбордингу."
+          }
+        },
+        "uz" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sizning ovozli onboarding hamrohingiz."
+          }
+        }
+      }
+    },
+    "Breezy" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Breezy" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Лёгкий" } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "Yengil" } }
+      }
+    },
+    "Bright" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Bright" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Яркий" } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "Yorqin" } }
+      }
+    },
+    "Excitable" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Excitable" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Эмоциональный" } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "Hayajonli" } }
+      }
+    },
+    "Female" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Female" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Женский" } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "Ayol" } }
+      }
+    },
+    "Informative" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Informative" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Информативный" } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "Ma'lumotli" } }
+      }
+    },
+    "Male" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Male" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Мужской" } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "Erkak" } }
+      }
+    },
+    "Play sample" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Play sample" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Прослушать" } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "Tinglash" } }
+      }
+    },
+    "Set your API key in the API Key tab to audition voices." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Set your API key in the API Key tab to audition voices." } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Чтобы прослушивать голоса, укажите API-ключ во вкладке API Key." } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "Ovozlarni tinglash uchun API Key bo'limida API kalitingizni kiriting." } }
+      }
+    },
+    "Stop sample" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Stop sample" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Остановить" } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "To'xtatish" } }
+      }
+    },
+    "Upbeat" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Upbeat" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Бодрый" } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "Quvnoq" } }
+      }
+    },
+    "Voice" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Voice" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Голос" } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "Ovoz" } }
+      }
+    },
+    "Voice applies on next session start." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Voice applies on next session start." } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Голос применится при следующем запуске сессии." } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "Ovoz keyingi sessiya boshlanganda qo'llanadi." } }
+      }
+    },
+    "Youthful" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Youthful" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Молодой" } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "Yosh" } }
+      }
+    },
+    "Buddy language" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Buddy language" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Язык Buddy" } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "Buddy tili" } }
+      }
+    },
+    "Language" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Language" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Язык" } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "Til" } }
+      }
+    },
+    "Buddy greets and replies in this language. Dynamic follows whatever you speak." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Buddy greets and replies in this language. Dynamic follows whatever you speak." } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Buddy здоровается и отвечает на этом языке. «Автоматически» подстраивается под вашу речь." } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "Buddy shu tilda salomlashadi va javob beradi. «Avtomatik» — gapingiz tiliga moslashadi." } }
+      }
+    },
+    "Dynamic" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Dynamic" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Автоматически" } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "Avtomatik" } }
+      }
+    },
+    "Uzbek" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Uzbek" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Узбекский" } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "O‘zbekcha" } }
+      }
+    },
+    "Russian" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Russian" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Русский" } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "Ruscha" } }
+      }
+    },
+    "English" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "English" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Английский" } },
+        "uz" : { "stringUnit" : { "state" : "translated", "value" : "Inglizcha" } }
+      }
+    }
+  },
+  "version" : "1.0"
+}
