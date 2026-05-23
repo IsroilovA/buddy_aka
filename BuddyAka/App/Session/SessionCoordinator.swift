@@ -532,7 +532,7 @@ final class SessionCoordinator {
             timeoutTask = nil
             settleTask?.cancel()
             settleTask = Task { [weak self] in
-                try? await Task.sleep(for: .milliseconds(400))
+                try? await Task.sleep(for: .milliseconds(200))
                 guard let self, !Task.isCancelled else { return }
                 self.apply(self.guidance.finishSettling())
             }
