@@ -63,8 +63,67 @@ enum BuddyTools {
         parameters: Schema(type: .object)
     )
 
+    static let exitLesson = FunctionDeclaration(
+        name: "exit_lesson",
+        description: "Drop out of the current lesson while keeping the session alive. Use when the user says they want to stop the lesson, skip it, do something else, or asks a question clearly outside the lesson's scope. After calling, you return to the normal free-form pointing loop and can help with anything else. Returns no_active_lesson if no lesson is running — in that case, do nothing.",
+        parameters: Schema(type: .object)
+    )
+
+    static let stopPointing = FunctionDeclaration(
+        name: "stop_pointing",
+        description: "Hide the halo and stop pointing at the current element. Use when the user says \"stop showing me that\", \"ok I see it\", \"you can stop pointing now\". Does NOT end the session or any lesson — you can call point_to_element again later.",
+        parameters: Schema(type: .object)
+    )
+
+    static let listLessons = FunctionDeclaration(
+        name: "list_lessons",
+        description: "Return the catalog of available lessons. Each entry has an id, title, app, and estimated_minutes. Call this to discover which lessons you can offer the user, or when they ask \"what can you teach me?\"",
+        parameters: Schema(type: .object)
+    )
+
+    static let startLesson = FunctionDeclaration(
+        name: "start_lesson",
+        description: "Begin a lesson. Provide either `lesson_id` (from the catalog) or `topic` (ad-hoc — you improvise the lesson). Returns lesson_already_active if a lesson is running — call exit_lesson first.",
+        parameters: Schema(
+            type: .object,
+            properties: [
+                "lesson_id": Schema(
+                    type: .string,
+                    description: "The id of a cataloged lesson (from list_lessons). Mutually exclusive with topic."
+                ),
+                "topic": Schema(
+                    type: .string,
+                    description: "A free-form topic for an ad-hoc lesson (no YAML needed). Mutually exclusive with lesson_id."
+                )
+            ]
+        )
+    )
+
+    static let advanceLessonStep = FunctionDeclaration(
+        name: "advance_lesson_step",
+        description: "Move to a specific step in the active lesson, or finish it. In a curated lesson, `to_step` is a 0-based index. In an ad-hoc lesson (one you improvised), call with no args to bump the step counter, or with `finish: true` to end. Returns no_active_lesson if no lesson is running.",
+        parameters: Schema(
+            type: .object,
+            properties: [
+                "to_step": Schema(
+                    type: .integer,
+                    description: "Absolute 0-based step index. Defaults to current+1 if omitted. Can go backward (replay)."
+                ),
+                "finish": Schema(
+                    type: .boolean,
+                    description: "If true, finish the lesson regardless of to_step."
+                )
+            ]
+        )
+    )
+
     static let all: [Tool] = [
-        Tool(functionDeclarations: [getUITree, pointToElement, startTour, stopTour, resumeTour])
+        Tool(functionDeclarations: [
+            getUITree, pointToElement,
+            startTour, stopTour, resumeTour,
+            exitLesson, stopPointing,
+            listLessons, startLesson, advanceLessonStep
+        ])
     ]
 }
 
@@ -78,4 +137,14 @@ struct PointToElementArgs: Decodable {
 
 struct StartTourArgs: Decodable {
     let element_ids: [String]
+}
+
+struct StartLessonArgs: Decodable {
+    let lesson_id: String?
+    let topic: String?
+}
+
+struct AdvanceLessonStepArgs: Decodable {
+    let to_step: Int?
+    let finish: Bool?
 }

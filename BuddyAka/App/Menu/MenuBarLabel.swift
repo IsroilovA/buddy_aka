@@ -26,8 +26,7 @@ struct MenuBarLabel: View {
         // bring the window forward whenever an error appears.
         .onChange(of: hasError) { _, isErrored in
             if isErrored {
-                NSApp.activate()
-                openWindow(id: "main")
+                WindowPresenter.showMainWindow(using: openWindow)
             }
         }
     }

@@ -65,7 +65,13 @@ public actor GeminiLiveClient {
                 ),
                 systemInstruction: SystemInstruction(parts: [TextPart(text: config.systemInstruction)]),
                 realtimeInputConfig: RealtimeInputConfig(activityHandling: "START_OF_ACTIVITY_INTERRUPTS"),
-                tools: config.tools.isEmpty ? nil : config.tools
+                tools: config.tools.isEmpty ? nil : config.tools,
+                inputAudioTranscription: EmptyConfig(),
+                outputAudioTranscription: EmptyConfig(),
+                contextWindowCompression: ContextWindowCompression(
+                    slidingWindow: .init(targetTokens: 32000)
+                ),
+                sessionResumption: SessionResumptionConfig(handle: config.resumptionHandle)
             )
         )
         do {
@@ -113,24 +119,28 @@ public actor GeminiLiveClient {
         }
     }
 
-    /// Send an app-generated text turn. Used for Buddy control signals such as
-    /// `[BUDDY_SIGNAL] target_clicked`; the prompt tells the model these are not
-    /// user speech. Silent on failure — a real disconnect will surface via
-    /// `receiveLoop`.
-    public func sendClientContentTurn(text: String) async {
+    /// Send an app-generated text turn via `realtimeInput.text`. Used for Buddy
+    /// control signals such as `[BUDDY_SIGNAL] target_clicked` and runtime
+    /// `[BUDDY_EVENT] …` envelopes; the persona prompt knows these are not user
+    /// speech. `realtimeInput` is the correct mid-session text path on the
+    /// pinned model — `clientContent` is reserved for session-start seeding.
+    public func sendRealtimeText(_ text: String) async {
         guard isConnected, task != nil else { return }
-        let envelope = ClientContentEnvelope(
-            clientContent: ClientContentBody(
-                turns: [UserTurn(role: "user", parts: [TextPart(text: text)])],
-                turnComplete: true
-            )
-        )
+        let envelope = ClientRealtimeTextEnvelope(realtimeInput: RealtimeInputText(text: text))
         do {
             try await sendJSON(envelope)
         } catch {
-            log.error("clientContent send failed: \(error.localizedDescription, privacy: .public)")
+            log.error("realtimeInput.text send failed: \(error.localizedDescription, privacy: .public)")
         }
     }
+
+    /// Back-compat: route legacy callers to the realtime-text path.
+    public func sendClientContentTurn(text: String) async {
+        await sendRealtimeText(text)
+    }
+
+    public var lastResumptionHandle: String? { _resumptionHandle }
+    private var _resumptionHandle: String?
 
     public func stop() async {
         await teardown(emitError: nil)
@@ -206,6 +216,9 @@ public actor GeminiLiveClient {
 
         for ev in events {
             if case .connected = ev { isConnected = true }
+            if case .sessionResumptionUpdate(let handle, let resumable) = ev, resumable, let handle {
+                _resumptionHandle = handle
+            }
             continuation?.yield(ev)
         }
     }

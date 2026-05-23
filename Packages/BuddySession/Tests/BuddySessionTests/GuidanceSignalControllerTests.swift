@@ -96,4 +96,35 @@ final class GuidanceSignalControllerTests: XCTestCase {
         _ = c.handleAXEvent(.focusedElementChanged(handle()))
         XCTAssertEqual(c.finishSettling(), .send(.screenChanged))
     }
+
+    func testClickDuringSettlingReplacesAction() {
+        var c = GuidanceSignalController()
+        c.startGuiding(elementID: "x", frame: frame)
+        _ = c.handleMouseClick(CGPoint(x: 140, y: 120)) // on target
+        XCTAssertEqual(c.handleMouseClick(CGPoint(x: 500, y: 500)), .scheduleSettle) // off target
+        XCTAssertEqual(c.finishSettling(), .send(.userClickedElsewhere))
+    }
+
+    func testClickDuringSettlingLastClickWins() {
+        var c = GuidanceSignalController()
+        c.startGuiding(elementID: "x", frame: frame)
+        _ = c.handleMouseClick(CGPoint(x: 500, y: 500)) // off target
+        XCTAssertEqual(c.handleMouseClick(CGPoint(x: 140, y: 120)), .scheduleSettle) // on target
+        XCTAssertEqual(c.finishSettling(), .send(.targetClicked))
+    }
+
+    func testOffTargetClickWithAXSendsCompoundSignal() {
+        var c = GuidanceSignalController()
+        c.startGuiding(elementID: "x", frame: frame)
+        _ = c.handleMouseClick(CGPoint(x: 500, y: 500))
+        _ = c.handleAXEvent(.focusedWindowChanged(handle()))
+        XCTAssertEqual(c.finishSettling(), .send(.userClickedElsewhereScreenChanged))
+    }
+
+    func testOffTargetClickWithoutAXSendsClickedElsewhere() {
+        var c = GuidanceSignalController()
+        c.startGuiding(elementID: "x", frame: frame)
+        _ = c.handleMouseClick(CGPoint(x: 500, y: 500))
+        XCTAssertEqual(c.finishSettling(), .send(.userClickedElsewhere))
+    }
 }

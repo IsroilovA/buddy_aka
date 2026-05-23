@@ -30,6 +30,10 @@ public struct AXElementHandle: @unchecked Sendable, Hashable {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(CFHash(raw))
     }
+
+    public var displayValue: String? {
+        AXAttr.displayValue(raw)
+    }
 }
 
 /// Production AX event source is `AXEventStream`; tests inject a fake.

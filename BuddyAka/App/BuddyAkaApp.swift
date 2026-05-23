@@ -1,3 +1,4 @@
+import BuddyLessons
 import SwiftUI
 
 @main
@@ -11,7 +12,9 @@ struct BuddyAkaApp: App {
     @State private var targetTracker: TargetApplicationTracker
     @State private var session: SessionCoordinator
     @State private var buddySettings: BuddySettings
+    @State private var lessonStore: LessonStore
     @Environment(\.openWindow) private var openWindow
+    @Environment(\.openSettings) private var openSettings
 
     init() {
         let state = OverlayState()
@@ -19,6 +22,7 @@ struct BuddyAkaApp: App {
         let perms = PermissionsCoordinator()
         let settings = BuddySettings()
         let tracker = TargetApplicationTracker()
+        let store = LessonStore(userDirectory: LessonStore.defaultUserDirectory)
         _overlay = State(initialValue: state)
         _overlayController = State(initialValue: OverlayController(state: state, settings: settings))
         _settingsRoute = State(initialValue: route)
@@ -28,9 +32,11 @@ struct BuddyAkaApp: App {
             overlay: state,
             permissions: perms,
             targetTracker: tracker,
-            buddySettings: settings
+            buddySettings: settings,
+            lessonStore: store
         ))
         _buddySettings = State(initialValue: settings)
+        _lessonStore = State(initialValue: store)
     }
 
     var body: some Scene {
@@ -42,7 +48,8 @@ struct BuddyAkaApp: App {
                 .environment(session)
                 .environment(settingsRoute)
                 .environment(buddySettings)
-                .onAppear { delegate.bind(openWindow: openWindow) }
+                .environment(lessonStore)
+                .onAppear { bindDelegateIfNeeded() }
         }
         .windowResizability(.contentSize)
         .defaultSize(width: 720, height: 540)
@@ -55,11 +62,13 @@ struct BuddyAkaApp: App {
                 .environment(session)
                 .environment(settingsRoute)
                 .environment(buddySettings)
+                .environment(lessonStore)
         } label: {
             MenuBarLabel(
                 allGranted: permissions.allGranted,
                 hasError: session.lastError != nil
             )
+            .onAppear { bindDelegateIfNeeded() }
         }
 
         Settings {
@@ -67,8 +76,22 @@ struct BuddyAkaApp: App {
                 .environment(permissions)
                 .environment(settingsRoute)
                 .environment(buddySettings)
+                .environment(lessonStore)
                 .frame(minWidth: 520, minHeight: 380)
         }
+    }
+}
+
+extension BuddyAkaApp {
+    private func bindDelegateIfNeeded() {
+        delegate.bind(
+            openWindow: openWindow,
+            openSettings: openSettings,
+            session: session,
+            onboarding: onboarding,
+            settingsRoute: settingsRoute,
+            buddySettings: buddySettings
+        )
     }
 }
 
@@ -87,6 +110,9 @@ struct RootSettingsView: View {
             BuddySettingsView()
                 .tabItem { Label(String(localized: "Buddy"), systemImage: "cursorarrow") }
                 .tag(SettingsTab.buddy)
+            LessonsSettingsView()
+                .tabItem { Label(String(localized: "Lessons"), systemImage: "book") }
+                .tag(SettingsTab.lessons)
         }
         .padding()
     }

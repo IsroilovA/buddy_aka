@@ -102,18 +102,28 @@ struct OutboundEncodingTests {
         let uz      = PersonaPrompt.v1(language: .uz)
         let en      = PersonaPrompt.v1(language: .en)
 
-        // Dynamic keeps the "DEFAULT to Russian … match them, every turn" behavior.
+        // Dynamic defaults to Russian and follows the user's language thereafter.
         #expect(dynamic.contains("DEFAULT to Russian"))
-        #expect(dynamic.contains("Match them, every turn"))
 
-        // Locked languages embed the hard rule and drop the match-them clause.
+        // Locked languages embed the hard rule.
         #expect(ru.contains("ALWAYS reply in RUSSIAN"))
-        #expect(!ru.contains("Match them, every turn"))
+        #expect(!ru.contains("DEFAULT to Russian"))
 
         #expect(uz.contains("ALWAYS reply in UZBEK using LATIN script"))
         #expect(uz.contains("NEVER use Cyrillic Uzbek"))
 
         #expect(en.contains("ALWAYS reply in ENGLISH"))
+    }
+
+    @Test("PersonaPrompt always includes lesson protocol section")
+    func personaPromptLessonProtocol() {
+        let prompt = PersonaPrompt.compose(PersonaContext(language: .en))
+        #expect(prompt.contains("LESSON MODE"))
+        #expect(prompt.contains("list_lessons"))
+        #expect(prompt.contains("start_lesson"))
+        #expect(prompt.contains("advance_lesson_step"))
+        #expect(prompt.contains("lesson_step_advanced"))
+        #expect(prompt.contains("GUIDELINE, not a script"))
     }
 
     @Test("realtimeInput envelope base64-encodes audio with the right mime type")

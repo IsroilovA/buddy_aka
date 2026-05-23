@@ -17,9 +17,20 @@ final class BuddySettings {
         didSet { UserDefaults.standard.set(language.rawValue, forKey: Self.languageKey) }
     }
 
+    var selectedLessonID: String? {
+        didSet {
+            if let id = selectedLessonID, !id.isEmpty {
+                UserDefaults.standard.set(id, forKey: Self.selectedLessonKey)
+            } else {
+                UserDefaults.standard.removeObject(forKey: Self.selectedLessonKey)
+            }
+        }
+    }
+
     private static let colorKey = BuddyColor.storageKey
     private static let voiceNameKey = "buddyVoiceName"
     private static let languageKey = "buddyLanguage"
+    private static let selectedLessonKey = "buddySelectedLessonID"
 
     init() {
         let raw = UserDefaults.standard.string(forKey: Self.colorKey)
@@ -32,5 +43,8 @@ final class BuddySettings {
         let storedLanguage = UserDefaults.standard.string(forKey: Self.languageKey)
             .flatMap(BuddyLanguage.init(rawValue:))
         self.language = storedLanguage ?? .default
+
+        let storedLesson = UserDefaults.standard.string(forKey: Self.selectedLessonKey)
+        self.selectedLessonID = (storedLesson?.isEmpty == false) ? storedLesson : nil
     }
 }

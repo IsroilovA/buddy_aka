@@ -40,25 +40,147 @@ public actor AXExtractor {
         }
 
         let screenUnion: CGRect? = options.onScreenOnly ? await Self.screensUnion() : nil
-        let deadline = started.addingTimeInterval(TimeInterval(options.overallTimeoutMs) / 1000.0)
 
-        var idGen = AXIDGenerator()
+        let fragment = walk(
+            root: root,
+            scope: .appWindow,
+            idPrefix: "aw",
+            options: options,
+            screenUnion: screenUnion,
+            started: started,
+            captureURL: true
+        )
+
+        let elapsedMs = Int(Date().timeIntervalSince(started) * 1000)
+        let snapshot = UISnapshot(
+            app: bundleID,
+            windowTitle: windowTitle,
+            url: fragment.url,
+            elements: fragment.elements,
+            stats: UISnapshotStats(
+                scanned: fragment.scanned,
+                kept: fragment.elements.count,
+                truncated: fragment.truncated,
+                elapsedMs: elapsedMs
+            )
+        )
+        let resolver = AXSnapshotResolver(
+            elements: fragment.resolverMap,
+            frames: fragment.frameMap,
+            nodes: fragment.nodeMap
+        )
+        return (snapshot, resolver)
+    }
+
+    /// Extract the system menu bar of the given pid (frontmost app's pid). Returns
+    /// the top-level menu bar items (Apple menu, app menus, extras menu) WITHOUT
+    /// drilling into open submenu contents — that tree is unbounded and only
+    /// becomes addressable once the user opens a menu (at which point the regular
+    /// AX events reveal the content).
+    public func extractMenuBar(
+        forPID pid: pid_t,
+        options: AXExtractOptions = AXExtractOptions(windowOnly: false, maxElements: 64, maxDepth: 3, overallTimeoutMs: 400)
+    ) async throws -> (elements: [UIElementNode], resolver: AXSnapshotResolver) {
+        guard AXIsProcessTrusted() else { throw Error.accessibilityNotTrusted }
+        let appElement = AXUIElementCreateApplication(pid)
+        AXAttr.setTimeout(appElement, seconds: Float(options.perElementTimeoutMs) / 1000.0)
+
+        var allElements: [UIElementNode] = []
+        var resolverMap: [String: AXUIElement] = [:]
+        var frameMap: [String: CGRect] = [:]
+        var nodeMap: [String: UIElementNode] = [:]
+        var truncatedAny = false
+        var scannedTotal = 0
+        let started = Date()
+        let screenUnion: CGRect? = options.onScreenOnly ? await Self.screensUnion() : nil
+
+        for attr in [kAXMenuBarAttribute as String, "AXExtrasMenuBar"] {
+            guard let raw = AXAttr.copy(appElement, attr) else { continue }
+            let bar = unsafeDowncast(raw, to: AXUIElement.self)
+            let fragment = walk(
+                root: bar,
+                scope: .menuBar,
+                idPrefix: "mb",
+                options: options,
+                screenUnion: screenUnion,
+                started: started,
+                captureURL: false
+            )
+            allElements.append(contentsOf: fragment.elements)
+            resolverMap.merge(fragment.resolverMap) { _, b in b }
+            frameMap.merge(fragment.frameMap) { _, b in b }
+            nodeMap.merge(fragment.nodeMap) { _, b in b }
+            scannedTotal += fragment.scanned
+            truncatedAny = truncatedAny || fragment.truncated
+        }
+
+        return (allElements, AXSnapshotResolver(elements: resolverMap, frames: frameMap, nodes: nodeMap))
+    }
+
+    /// Extract the Dock as its own AX tree. Best-effort — the Dock is its own
+    /// process (`com.apple.dock`). If it can't be reached, returns empty arrays.
+    public func extractDock(
+        options: AXExtractOptions = AXExtractOptions(windowOnly: false, maxElements: 80, maxDepth: 5, overallTimeoutMs: 400)
+    ) async throws -> (elements: [UIElementNode], resolver: AXSnapshotResolver) {
+        guard AXIsProcessTrusted() else { throw Error.accessibilityNotTrusted }
+        guard let dockApp = await MainActor.run(body: {
+            NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.dock").first
+        }) else {
+            return ([], AXSnapshotResolver(elements: [:], frames: [:], nodes: [:]))
+        }
+        let appElement = AXUIElementCreateApplication(dockApp.processIdentifier)
+        AXAttr.setTimeout(appElement, seconds: Float(options.perElementTimeoutMs) / 1000.0)
+        let screenUnion: CGRect? = options.onScreenOnly ? await Self.screensUnion() : nil
+        let fragment = walk(
+            root: appElement,
+            scope: .dock,
+            idPrefix: "dk",
+            options: options,
+            screenUnion: screenUnion,
+            started: Date(),
+            captureURL: false
+        )
+        let resolver = AXSnapshotResolver(
+            elements: fragment.resolverMap,
+            frames: fragment.frameMap,
+            nodes: fragment.nodeMap
+        )
+        return (fragment.elements, resolver)
+    }
+
+    // MARK: - Walk (shared DFS)
+
+    private struct WalkFragment {
         var elements: [UIElementNode] = []
         var resolverMap: [String: AXUIElement] = [:]
         var frameMap: [String: CGRect] = [:]
         var nodeMap: [String: UIElementNode] = [:]
-        var scanned = 0
-        var truncated = false
+        var scanned: Int = 0
+        var truncated: Bool = false
         var url: String?
+    }
+
+    private func walk(
+        root: AXUIElement,
+        scope: UIElementScope,
+        idPrefix: String,
+        options: AXExtractOptions,
+        screenUnion: CGRect?,
+        started: Date,
+        captureURL: Bool
+    ) -> WalkFragment {
+        var fragment = WalkFragment()
+        let deadline = started.addingTimeInterval(TimeInterval(options.overallTimeoutMs) / 1000.0)
+        var counter = 0
 
         // Iterative DFS with caps. Stack holds (element, depth).
         var stack: [(AXUIElement, Int)] = [(root, 0)]
         while let (el, depth) = stack.popLast() {
-            if Task.isCancelled { truncated = true; break }
-            if Date() >= deadline { truncated = true; break }
-            if elements.count >= options.maxElements { truncated = true; break }
+            if Task.isCancelled { fragment.truncated = true; break }
+            if Date() >= deadline { fragment.truncated = true; break }
+            if fragment.elements.count >= options.maxElements { fragment.truncated = true; break }
 
-            scanned += 1
+            fragment.scanned += 1
 
             let attrs = AXAttr.batch(el)
             let role = attrs.role ?? ""
@@ -69,13 +191,12 @@ public actor AXExtractor {
             let focused = attrs.focused ?? false
             let frame = attrs.frame
 
-            // First AXWebArea we see — grab its URL for browser flows.
-            if url == nil, role == "AXWebArea" {
+            if captureURL, fragment.url == nil, role == "AXWebArea" {
                 if let raw = AXAttr.copy(el, "AXURL") {
                     if let nsurl = raw as? URL {
-                        url = nsurl.absoluteString
+                        fragment.url = nsurl.absoluteString
                     } else if let s = raw as? String {
-                        url = s
+                        fragment.url = s
                     }
                 }
             }
@@ -87,9 +208,11 @@ public actor AXExtractor {
                 frame: frame,
                 enabled: enabled
             )
-            if AXFilter.keep(candidate, onScreenOnly: options.onScreenOnly, screenUnion: screenUnion),
-               let frame {
-                let id = idGen.next()
+            let kept = AXFilter.keep(candidate, onScreenOnly: options.onScreenOnly, screenUnion: screenUnion)
+                || Self.shouldKeepInChrome(scope: scope, role: role)
+            if kept, let frame {
+                counter += 1
+                let id = "\(idPrefix)_\(counter)"
                 let rawValue = AXAttr.displayValue(el)
                 let value = Self.safeValue(for: attrs, raw: rawValue, label: text.label, description: text.description)
                 let normalized = UINormalization.axRole(role, subrole: subrole)
@@ -98,6 +221,7 @@ public actor AXExtractor {
                 let node = UIElementNode(
                     id: id,
                     source: .ax,
+                    scope: scope,
                     role: normalized.0,
                     label: text.label,
                     description: text.description,
@@ -108,10 +232,10 @@ public actor AXExtractor {
                     frame: UIFrame(frame),
                     metadata: metadata
                 )
-                elements.append(node)
-                resolverMap[id] = el
-                frameMap[id] = frame
-                nodeMap[id] = node
+                fragment.elements.append(node)
+                fragment.resolverMap[id] = el
+                fragment.frameMap[id] = frame
+                fragment.nodeMap[id] = node
             }
 
             if depth + 1 <= options.maxDepth {
@@ -123,21 +247,24 @@ public actor AXExtractor {
             }
         }
 
-        let elapsedMs = Int(Date().timeIntervalSince(started) * 1000)
-        let snapshot = UISnapshot(
-            app: bundleID,
-            windowTitle: windowTitle,
-            url: url,
-            elements: elements,
-            stats: UISnapshotStats(
-                scanned: scanned,
-                kept: elements.count,
-                truncated: truncated,
-                elapsedMs: elapsedMs
-            )
-        )
-        let resolver = AXSnapshotResolver(elements: resolverMap, frames: frameMap, nodes: nodeMap)
-        return (snapshot, resolver)
+        return fragment
+    }
+
+    /// In the menu-bar / Dock scopes, the strict AXFilter is too aggressive: the
+    /// Apple menu's AXMenuBarItem has no AXTitle (it's just the Apple icon) and
+    /// the AXFilter rejects roles that aren't in its actionable set. Let
+    /// the scope-aware caller keep menu-bar items and dock items unconditionally
+    /// so the persona has at least the top-level chrome to point at.
+    private static func shouldKeepInChrome(scope: UIElementScope, role: String) -> Bool {
+        switch scope {
+        case .menuBar:
+            return role == "AXMenuBarItem" || role == "AXMenuItem"
+        case .dock:
+            // AXDockItem is the canonical Dock-item role.
+            return role == "AXDockItem"
+        case .appWindow, .systemUI:
+            return false
+        }
     }
 
     // MARK: - Helpers
@@ -258,4 +385,5 @@ public actor AXExtractor {
         guard !screens.isEmpty else { return .infinite }
         return screens.reduce(.null) { $0.union($1.frame) }
     }
+
 }

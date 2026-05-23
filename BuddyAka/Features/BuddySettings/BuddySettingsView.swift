@@ -1,4 +1,5 @@
 import BuddyVoice
+import KeyboardShortcuts
 import SwiftUI
 
 struct BuddySettingsView: View {
@@ -19,6 +20,12 @@ struct BuddySettingsView: View {
         @Bindable var settings = settings
 
         Form {
+            Section {
+                KeyboardShortcuts.Recorder(String(localized: "Toggle Buddy:"), name: .toggleBuddy)
+            } header: {
+                Text(String(localized: "Shortcut"))
+            }
+
             Section {
                 ColorPicker(
                     selection: Binding(

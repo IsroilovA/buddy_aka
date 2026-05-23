@@ -4,6 +4,7 @@ enum SettingsTab: Hashable {
     case permissions
     case apiKey
     case buddy
+    case lessons
 }
 
 @MainActor

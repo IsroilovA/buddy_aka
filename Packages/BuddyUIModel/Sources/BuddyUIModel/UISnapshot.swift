@@ -34,6 +34,7 @@ public struct UISnapshot: Codable, Sendable, Equatable {
 public struct UIElementNode: Codable, Sendable, Equatable {
     public var id: String
     public var source: UIElementSource
+    public var scope: UIElementScope
     public var role: UIElementRole
     public var label: String?
     public var description: String?
@@ -45,13 +46,14 @@ public struct UIElementNode: Codable, Sendable, Equatable {
     public var metadata: [String: String]
 
     enum CodingKeys: String, CodingKey {
-        case id, source, role, label, description, value, enabled, focused, frame, metadata
+        case id, source, scope, role, label, description, value, enabled, focused, frame, metadata
         case hasValue = "has_value"
     }
 
     public init(
         id: String,
         source: UIElementSource,
+        scope: UIElementScope = .appWindow,
         role: UIElementRole,
         label: String? = nil,
         description: String? = nil,
@@ -64,6 +66,7 @@ public struct UIElementNode: Codable, Sendable, Equatable {
     ) {
         self.id = id
         self.source = source
+        self.scope = scope
         self.role = role
         self.label = label
         self.description = description
@@ -73,6 +76,23 @@ public struct UIElementNode: Codable, Sendable, Equatable {
         self.focused = focused
         self.frame = frame
         self.metadata = metadata
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.id = try c.decode(String.self, forKey: .id)
+        self.source = try c.decode(UIElementSource.self, forKey: .source)
+        // Codable default: pre-scope snapshots decode as appWindow.
+        self.scope = (try? c.decode(UIElementScope.self, forKey: .scope)) ?? .appWindow
+        self.role = try c.decode(UIElementRole.self, forKey: .role)
+        self.label = try c.decodeIfPresent(String.self, forKey: .label)
+        self.description = try c.decodeIfPresent(String.self, forKey: .description)
+        self.value = try c.decodeIfPresent(String.self, forKey: .value)
+        self.hasValue = (try? c.decode(Bool.self, forKey: .hasValue)) ?? false
+        self.enabled = try c.decode(Bool.self, forKey: .enabled)
+        self.focused = try c.decode(Bool.self, forKey: .focused)
+        self.frame = try c.decode(UIFrame.self, forKey: .frame)
+        self.metadata = (try? c.decode([String: String].self, forKey: .metadata)) ?? [:]
     }
 }
 
@@ -124,6 +144,16 @@ public enum UIElementSource: String, Codable, Sendable, Equatable {
     case ax
     case dom
     case vision
+}
+
+/// Where on screen the element lives. Orthogonal to `UIElementSource`.
+/// `appWindow` means "inside the frontmost app's focused window". The other
+/// three describe the always-on-screen chrome that exists outside that window.
+public enum UIElementScope: String, Codable, Sendable, Equatable {
+    case appWindow = "app_window"
+    case menuBar = "menu_bar"
+    case dock
+    case systemUI = "system_ui"
 }
 
 public enum UIElementRole: String, Codable, Sendable, Equatable {

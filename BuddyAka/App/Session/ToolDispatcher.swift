@@ -1,5 +1,6 @@
 import AppKit
 import BuddyAccessibility
+import BuddyLessons
 import BuddySafariDOM
 import BuddySession
 import BuddyUIModel
@@ -22,6 +23,11 @@ enum ToolErrorCode: String, Error {
     case axExtractionFailed = "ax_extraction_failed"
     case elementOffscreen = "element_offscreen"
     case allElementsUnresolved = "all_elements_unresolved"
+    case lessonNotFound = "lesson_not_found"
+    case lessonAlreadyActive = "lesson_already_active"
+    case noActiveLesson = "no_active_lesson"
+    case stepOutOfRange = "step_out_of_range"
+    case missingLessonIdOrTopic = "missing_lesson_id_or_topic"
 }
 
 // Bundle IDs whose frontmost window we extract via DOM (AppleScript +
@@ -35,6 +41,17 @@ private let domExtractionBundles: Set<String> = [
 // Empty-payload success body shared by the simple tour tools.
 struct ToolSuccess: Encodable { let success = true }
 
+enum LessonStartSpec {
+    case curated(BuddyLessons.Lesson)
+    case adHoc(topic: String)
+}
+
+enum AdvanceTarget {
+    case nextStep
+    case step(Int)
+    case finish
+}
+
 // Side-effect a tool execution had on session state. The coordinator uses this
 // to transition into `.guiding` and arm the idle-timeout. nil ⇒ no transition.
 enum ToolEffect {
@@ -42,6 +59,10 @@ enum ToolEffect {
     case tourStarted(steps: [TourStep], resolver: UISnapshotResolving)
     case tourStopped
     case tourResumed
+    case lessonExited
+    case pointingStopped
+    case lessonStartRequested(spec: LessonStartSpec)
+    case lessonStepAdvanceRequested(target: AdvanceTarget)
 }
 
 struct ToolOutcome {
@@ -56,6 +77,7 @@ final class ToolDispatcher {
     private let overlay: OverlayState
     private let permissions: PermissionsCoordinator
     private let targetPID: @MainActor () -> pid_t?
+    private let lessonStore: LessonStore
 
     private var currentResolver: UISnapshotResolving?
     private var currentSnapshotPID: pid_t?
@@ -66,13 +88,15 @@ final class ToolDispatcher {
     init(
         overlay: OverlayState,
         permissions: PermissionsCoordinator,
-        targetPID: @escaping @MainActor () -> pid_t?
+        targetPID: @escaping @MainActor () -> pid_t?,
+        lessonStore: LessonStore
     ) {
         self.extractor = AXExtractor()
         self.domExtractor = SafariDOMExtractor()
         self.overlay = overlay
         self.permissions = permissions
         self.targetPID = targetPID
+        self.lessonStore = lessonStore
     }
 
     func reset() {
@@ -83,6 +107,26 @@ final class ToolDispatcher {
     func clearSnapshot() {
         currentResolver = nil
         currentSnapshotPID = nil
+    }
+
+    /// Re-reads the live frame for a snapshot element ID. Returns nil if the
+    /// resolver is stale, the element is unknown, or AX can no longer locate it.
+    func liveFrame(for elementID: String) -> CGRect? {
+        guard let resolver = currentResolver else { return nil }
+        return resolver.liveFrame(for: elementID)
+    }
+
+    /// Returns the underlying AXUIElement handle for an element ID, if the
+    /// resolver is AX-backed. DOM-backed elements return nil.
+    func axElementHandle(for elementID: String) -> AXElementHandle? {
+        guard let resolver = currentResolver else { return nil }
+        if let composite = resolver as? CompositeSnapshotResolver {
+            return composite.axElement(for: elementID).map(AXElementHandle.init)
+        }
+        if let ax = resolver as? AXSnapshotResolver {
+            return ax.element(for: elementID).map(AXElementHandle.init)
+        }
+        return nil
     }
 
     // Always produces an outcome — Gemini 3.1 Flash Live blocks until the
@@ -102,6 +146,16 @@ final class ToolDispatcher {
             return handleStopTour(call)
         case "resume_tour":
             return handleResumeTour(call)
+        case "exit_lesson":
+            return handleExitLesson(call)
+        case "stop_pointing":
+            return handleStopPointing(call)
+        case "list_lessons":
+            return handleListLessons(call)
+        case "start_lesson":
+            return handleStartLesson(call)
+        case "advance_lesson_step":
+            return handleAdvanceLessonStep(call)
         default:
             return ToolOutcome(response: errorResponse(call, .unknownTool), effect: nil)
         }
@@ -112,58 +166,98 @@ final class ToolDispatcher {
     private func handleGetUITree(_ call: ToolCall) async -> ToolResponse {
         let args = (try? decoder.decode(GetUITreeArgs.self, from: call.argsJSON))
             ?? GetUITreeArgs()
-        guard let pid = targetPID() else {
-            return errorResponse(call, .appNotFound)
-        }
 
-        // Route to DOM extraction for browsers where AX is sparse. Falls back
-        // to AX on any DOM-side failure (no Automation grant, no tab, JS error)
-        // so the user still gets *something* rather than a hard error.
-        let bundleID = NSRunningApplication(processIdentifier: pid)?.bundleIdentifier
-        if let bundleID, domExtractionBundles.contains(bundleID) {
-            if let response = await tryDOMExtraction(call: call, pid: pid, bundleID: bundleID) {
-                return response
+        let pid = targetPID()
+        let bundleID = pid.flatMap { NSRunningApplication(processIdentifier: $0)?.bundleIdentifier }
+
+        // Build the window/page snapshot via DOM (browsers) or AX (everything else).
+        // When no app is focused, we skip this step — menu bar + Dock still come through.
+        var windowSnapshot: UISnapshot?
+        var windowResolver: (any UISnapshotResolving)?
+
+        if let pid {
+            if let bundleID, domExtractionBundles.contains(bundleID) {
+                if let (snap, resolver) = await tryDOMExtractionFragment(call: call, pid: pid, bundleID: bundleID) {
+                    windowSnapshot = snap
+                    windowResolver = resolver
+                } else {
+                    log.notice("DOM extraction unavailable for \(bundleID ?? "?", privacy: .public) — falling back to AX")
+                }
             }
-            log.notice("DOM extraction unavailable for \(bundleID, privacy: .public) — falling back to AX")
+            if windowSnapshot == nil {
+                let opts = AXExtractOptions(windowOnly: args.focused_window_only ?? true)
+                do {
+                    let (snap, resolver) = try await extractor.extract(target: .pid(pid), options: opts)
+                    windowSnapshot = snap
+                    windowResolver = resolver
+                } catch AXExtractor.Error.accessibilityNotTrusted {
+                    permissions.refresh()
+                    return errorResponse(call, .accessibilityNotTrusted)
+                } catch AXExtractor.Error.appNotFound, AXExtractor.Error.noFocusedWindow {
+                    // Fall through with no window snapshot. Persona handles via NO APP FOCUSED.
+                    windowSnapshot = nil
+                } catch {
+                    log.error("AX extraction failed: \(String(describing: error), privacy: .public)")
+                    windowSnapshot = nil
+                }
+            }
         }
 
-        let opts = AXExtractOptions(windowOnly: args.focused_window_only ?? true)
-        do {
-            let (snapshot, resolver) = try await extractor.extract(
-                target: .pid(pid),
-                options: opts
-            )
-            currentResolver = resolver
-            currentSnapshotPID = pid
-            log.notice("get_ui_tree (AX) → \(snapshot.elements.count) elements (truncated=\(snapshot.stats.truncated))")
-            return ToolResponse(
-                id: call.id,
-                name: call.name,
-                response: AnyEncodable(snapshot)
-            )
-        } catch AXExtractor.Error.accessibilityNotTrusted {
-            permissions.refresh()
-            return errorResponse(call, .accessibilityNotTrusted)
-        } catch AXExtractor.Error.appNotFound {
-            return errorResponse(call, .appNotFound)
-        } catch AXExtractor.Error.noFocusedWindow {
-            return errorResponse(call, .noFocusedWindow)
-        } catch {
-            return errorResponse(call, .axExtractionFailed)
+        // Menu bar (uses frontmost app's pid; falls back to the workspace's
+        // current frontmost if no PID is being tracked yet).
+        var menuBarElements: [UIElementNode] = []
+        var menuBarResolver: (any UISnapshotResolving)?
+        let menuBarPID = pid ?? NSWorkspace.shared.frontmostApplication?.processIdentifier
+        if let menuBarPID {
+            if let (els, resolver) = try? await extractor.extractMenuBar(forPID: menuBarPID) {
+                menuBarElements = els
+                menuBarResolver = resolver
+            }
         }
+
+        // Dock (always queried — separate process).
+        var dockElements: [UIElementNode] = []
+        var dockResolver: (any UISnapshotResolving)?
+        if let (els, resolver) = try? await extractor.extractDock() {
+            dockElements = els
+            dockResolver = resolver
+        }
+
+        // Merge into one snapshot.
+        var combinedElements: [UIElementNode] = []
+        if let windowSnapshot { combinedElements.append(contentsOf: windowSnapshot.elements) }
+        combinedElements.append(contentsOf: menuBarElements)
+        combinedElements.append(contentsOf: dockElements)
+
+        let mergedSnapshot = UISnapshot(
+            app: windowSnapshot?.app ?? bundleID,
+            windowTitle: windowSnapshot?.windowTitle,
+            url: windowSnapshot?.url,
+            elements: combinedElements,
+            stats: UISnapshotStats(
+                scanned: (windowSnapshot?.stats.scanned ?? 0) + menuBarElements.count + dockElements.count,
+                kept: combinedElements.count,
+                truncated: windowSnapshot?.stats.truncated ?? false,
+                elapsedMs: windowSnapshot?.stats.elapsedMs ?? 0
+            )
+        )
+
+        let composite = CompositeSnapshotResolver([windowResolver, menuBarResolver, dockResolver].compactMap { $0 })
+        currentResolver = composite
+        currentSnapshotPID = pid
+        log.notice("get_ui_tree → \(mergedSnapshot.elements.count) elements (window=\(windowSnapshot?.elements.count ?? 0) menuBar=\(menuBarElements.count) dock=\(dockElements.count))")
+        return ToolResponse(
+            id: call.id,
+            name: call.name,
+            response: AnyEncodable(mergedSnapshot)
+        )
     }
 
-    // Returns nil on a recoverable DOM failure (caller should fall back to AX).
-    // Returns a ToolResponse on success or on an unrecoverable error worth
-    // surfacing directly (e.g. accessibility not trusted, which AX would also
-    // hit).
-    private func tryDOMExtraction(
+    private func tryDOMExtractionFragment(
         call: ToolCall,
         pid: pid_t,
         bundleID: String
-    ) async -> ToolResponse? {
-        // Need AXWebArea frame to translate viewport coords to screen coords.
-        // If we can't get it, fall back to AX rather than ship wrong frames.
+    ) async -> (UISnapshot, any UISnapshotResolving)? {
         let webAreaFrame: CGRect
         do {
             var frame = try await extractor.webAreaFrame(target: .pid(pid))
@@ -171,43 +265,24 @@ final class ToolDispatcher {
                 try? await Task.sleep(nanoseconds: 150_000_000)
                 frame = try await extractor.webAreaFrame(target: .pid(pid))
             }
-            guard let frame else {
-                log.notice("DOM extraction: no AXWebArea reachable")
-                return nil
-            }
+            guard let frame else { return nil }
             webAreaFrame = frame
-        } catch AXExtractor.Error.accessibilityNotTrusted {
-            permissions.refresh()
-            return errorResponse(call, .accessibilityNotTrusted)
         } catch {
             return nil
         }
-
         do {
             let (snapshot, resolver) = try await domExtractor.extract(
                 webAreaFrame: webAreaFrame,
                 appBundleID: bundleID
             )
-            currentResolver = resolver
-            currentSnapshotPID = pid
-            log.notice("get_ui_tree (DOM) → \(snapshot.elements.count) elements, \(snapshot.stats.elapsedMs)ms")
-            return ToolResponse(
-                id: call.id,
-                name: call.name,
-                response: AnyEncodable(snapshot)
-            )
-        } catch SafariDOMExtractor.ExtractError.notAuthorized {
-            // First DOM attempt should surface the system Automation prompt.
-            // If the user denies it, keep the session usable via AX fallback.
-            log.notice("DOM extraction: Automation not authorized — falling back to AX")
-            return nil
-        } catch SafariDOMExtractor.ExtractError.noTab {
-            log.notice("DOM extraction: no Safari tab — falling back to AX")
+            return (snapshot, resolver)
+        } catch SafariDOMExtractor.ExtractError.notAuthorized, SafariDOMExtractor.ExtractError.noTab {
             return nil
         } catch {
             log.error("DOM extraction failed: \(String(describing: error), privacy: .public)")
             return nil
         }
+        _ = call
     }
 
     // MARK: - point_to_element
@@ -324,24 +399,117 @@ final class ToolDispatcher {
         return ToolOutcome(response: successResponse(call), effect: .tourResumed)
     }
 
+    private func handleExitLesson(_ call: ToolCall) -> ToolOutcome {
+        log.notice("exit_lesson")
+        return ToolOutcome(response: successResponse(call), effect: .lessonExited)
+    }
+
+    private func handleStopPointing(_ call: ToolCall) -> ToolOutcome {
+        log.notice("stop_pointing")
+        return ToolOutcome(response: successResponse(call), effect: .pointingStopped)
+    }
+
+    // MARK: - list_lessons / start_lesson / advance_lesson_step
+
+    private func handleListLessons(_ call: ToolCall) -> ToolOutcome {
+        struct Entry: Encodable {
+            let id: String
+            let title: String
+            let app: String
+            let estimated_minutes: Int?
+        }
+        let entries = lessonStore.lessons.map { lesson in
+            let appDesc: String
+            switch lesson.app {
+            case .bundleID(let id): appDesc = id
+            case .urlMatch(let url): appDesc = url
+            }
+            return Entry(id: lesson.id, title: lesson.title, app: appDesc, estimated_minutes: lesson.estimatedMinutes)
+        }
+        log.notice("list_lessons → \(entries.count) lessons")
+        return ToolOutcome(
+            response: ToolResponse(id: call.id, name: call.name, response: AnyEncodable(entries)),
+            effect: nil
+        )
+    }
+
+    private func handleStartLesson(_ call: ToolCall) -> ToolOutcome {
+        guard let args = try? decoder.decode(StartLessonArgs.self, from: call.argsJSON) else {
+            return ToolOutcome(response: errorResponse(call, .invalidArgs), effect: nil)
+        }
+        if args.lesson_id != nil && args.topic != nil {
+            return ToolOutcome(response: errorResponse(call, .invalidArgs), effect: nil)
+        }
+        if let lessonID = args.lesson_id {
+            guard let lesson = lessonStore.lesson(id: lessonID) else {
+                return ToolOutcome(response: errorResponse(call, .lessonNotFound), effect: nil)
+            }
+            log.notice("start_lesson → curated \(lessonID, privacy: .public)")
+            return ToolOutcome(
+                response: successResponse(call),
+                effect: .lessonStartRequested(spec: .curated(lesson))
+            )
+        }
+        if let topic = args.topic, !topic.isEmpty {
+            log.notice("start_lesson → ad-hoc \(topic, privacy: .public)")
+            return ToolOutcome(
+                response: successResponse(call),
+                effect: .lessonStartRequested(spec: .adHoc(topic: topic))
+            )
+        }
+        return ToolOutcome(response: errorResponse(call, .missingLessonIdOrTopic), effect: nil)
+    }
+
+    private func handleAdvanceLessonStep(_ call: ToolCall) -> ToolOutcome {
+        let args = (try? decoder.decode(AdvanceLessonStepArgs.self, from: call.argsJSON))
+            ?? AdvanceLessonStepArgs(to_step: nil, finish: nil)
+        if args.finish == true {
+            log.notice("advance_lesson_step → finish")
+            return ToolOutcome(
+                response: successResponse(call),
+                effect: .lessonStepAdvanceRequested(target: .finish)
+            )
+        }
+        if let step = args.to_step {
+            log.notice("advance_lesson_step → step \(step)")
+            return ToolOutcome(
+                response: successResponse(call),
+                effect: .lessonStepAdvanceRequested(target: .step(step))
+            )
+        }
+        log.notice("advance_lesson_step → next")
+        return ToolOutcome(
+            response: successResponse(call),
+            effect: .lessonStepAdvanceRequested(target: .nextStep)
+        )
+    }
+
     private func successResponse(_ call: ToolCall) -> ToolResponse {
         ToolResponse(id: call.id, name: call.name, response: AnyEncodable(ToolSuccess()))
     }
 
     private func freshResolver() -> Result<UISnapshotResolving, ToolErrorCode> {
         guard let resolver = currentResolver else { return .failure(.noActiveSnapshot) }
+        // Tour mode is window-bound; require the same app to be in focus.
         guard let pid = targetPID() else { return .failure(.appNotFound) }
         guard currentSnapshotPID == pid else { return .failure(.staleSnapshot) }
         return .success(resolver)
     }
 
-    // Resolves an opaque element id to a live rect in AX screen coordinates and
-    // validates that the resolver is for the currently-focused app.
+    // Resolves an opaque element id to a live rect in AX screen coordinates.
+    // Menu bar (mb_) and Dock (dk_) IDs are valid regardless of the currently
+    // focused app — those elements live in separate processes that don't go
+    // stale on app switch. App-window IDs (aw_, or DOM extractor IDs) still
+    // require the originating app to be in focus.
     private func resolveLiveRect(forElementID id: String) -> Result<CGRect, ToolErrorCode> {
         guard let resolver = currentResolver else { return .failure(.noActiveSnapshot) }
-        guard let pid = targetPID() else { return .failure(.appNotFound) }
-        guard currentSnapshotPID == pid else { return .failure(.staleSnapshot) }
         guard resolver.hasElement(id) else { return .failure(.elementNotFound) }
+
+        let isChromeID = id.hasPrefix("mb_") || id.hasPrefix("dk_")
+        if !isChromeID {
+            guard let pid = targetPID() else { return .failure(.appNotFound) }
+            guard currentSnapshotPID == pid else { return .failure(.staleSnapshot) }
+        }
         guard let rect = resolver.liveFrame(for: id) else {
             return .failure(.staleSnapshot)
         }

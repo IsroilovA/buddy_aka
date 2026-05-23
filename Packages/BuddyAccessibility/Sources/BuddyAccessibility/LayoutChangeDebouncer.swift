@@ -15,16 +15,22 @@ final class LayoutChangeDebouncer {
     }
 
     let window: Duration
+    let maxWait: Duration
     private var pendingFire: ContinuousClock.Instant?
+    private var burstStart: ContinuousClock.Instant?
 
-    init(window: Duration = .milliseconds(200)) {
+    init(window: Duration = .milliseconds(200), maxWait: Duration = .seconds(1)) {
         self.window = window
+        self.maxWait = maxWait
     }
 
     /// Record a new burst sample. Returns the deadline at which the owner
     /// should arm (or re-arm) its timer.
     func record(at now: ContinuousClock.Instant) -> ContinuousClock.Instant {
-        let deadline = now.advanced(by: window)
+        if burstStart == nil { burstStart = now }
+        let slidingDeadline = now.advanced(by: window)
+        let capDeadline = burstStart!.advanced(by: maxWait)
+        let deadline = min(slidingDeadline, capDeadline)
         pendingFire = deadline
         return deadline
     }
@@ -37,6 +43,7 @@ final class LayoutChangeDebouncer {
         guard let fire = pendingFire else { return .idle }
         if now >= fire {
             pendingFire = nil
+            burstStart = nil
             return .emit
         }
         return .reschedule(fire)

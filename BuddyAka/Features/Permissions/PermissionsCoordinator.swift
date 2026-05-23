@@ -134,7 +134,12 @@ final class PermissionsCoordinator {
     // After an OS modal prompt, an LSUIElement app loses focus to whichever
     // regular app was previously active. Pull focus back so our window stays in view.
     private func reactivate() {
-        DispatchQueue.main.async { NSApp.activate() }
+        DispatchQueue.main.async {
+            NSApp.activate()
+            if let w = NSApp.windows.first(where: { $0.isVisible && $0.canBecomeKey }) {
+                w.orderFrontRegardless()
+            }
+        }
     }
 
     private func openSystemSettings(for kind: PermissionKind) {

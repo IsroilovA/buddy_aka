@@ -8,7 +8,9 @@ public enum LiveEvent: Sendable, Equatable {
     case turnComplete
     case interrupted
     case toolCall(ToolCall)
+    case toolCallCancellation(ids: [String])
     case goAway(reason: String?)
+    case sessionResumptionUpdate(handle: String?, resumable: Bool)
     case disconnected(GeminiLiveError?)
 }
 

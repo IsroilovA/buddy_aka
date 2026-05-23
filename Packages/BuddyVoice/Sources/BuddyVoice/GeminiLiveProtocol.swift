@@ -18,6 +18,23 @@ struct ClientSetup: Encodable {
     let systemInstruction: SystemInstruction
     let realtimeInputConfig: RealtimeInputConfig
     let tools: [Tool]?
+    var inputAudioTranscription: EmptyConfig? = nil
+    var outputAudioTranscription: EmptyConfig? = nil
+    var contextWindowCompression: ContextWindowCompression? = nil
+    var sessionResumption: SessionResumptionConfig? = nil
+}
+
+struct EmptyConfig: Encodable {}
+
+struct ContextWindowCompression: Encodable {
+    struct SlidingWindow: Encodable {
+        let targetTokens: Int
+    }
+    let slidingWindow: SlidingWindow
+}
+
+struct SessionResumptionConfig: Encodable {
+    let handle: String?
 }
 
 struct GenerationConfig: Encodable {
@@ -61,6 +78,18 @@ struct ClientRealtimeAudioEnvelope: Encodable {
 
 struct RealtimeInputAudio: Encodable {
     let audio: InlineDataOut
+}
+
+/// Mid-session text turn. Lives in `realtimeInput` (not `clientContent`) because
+/// `gemini-3.1-flash-live-preview` treats `clientContent` as a session-start
+/// seeding API. The persona prompt's `[BUDDY_SIGNAL]` / `[BUDDY_EVENT]` envelopes
+/// must arrive via this path.
+struct ClientRealtimeTextEnvelope: Encodable {
+    let realtimeInput: RealtimeInputText
+}
+
+struct RealtimeInputText: Encodable {
+    let text: String
 }
 
 struct InlineDataOut: Encodable {
@@ -158,6 +187,17 @@ enum ServerFrameParser {
 
         if let goAway = dict["goAway"] as? [String: Any] {
             events.append(.goAway(reason: goAway["timeLeft"] as? String))
+        }
+
+        if let resume = dict["sessionResumptionUpdate"] as? [String: Any] {
+            let handle = resume["newHandle"] as? String
+            let resumable = (resume["resumable"] as? Bool) ?? false
+            events.append(.sessionResumptionUpdate(handle: handle, resumable: resumable))
+        }
+
+        if let tcCancel = dict["toolCallCancellation"] as? [String: Any],
+           let ids = tcCancel["ids"] as? [String] {
+            events.append(.toolCallCancellation(ids: ids))
         }
 
         return events

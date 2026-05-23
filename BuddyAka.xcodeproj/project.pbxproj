@@ -7,11 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		74888AFB2FC2140F0073A698 /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = AA00001500000000 /* KeyboardShortcuts */; };
 		AA00000300000000 /* BuddyAccessibility in Frameworks */ = {isa = PBXBuildFile; productRef = AA00000200000000 /* BuddyAccessibility */; };
 		AA00000600000000 /* BuddyVoice in Frameworks */ = {isa = PBXBuildFile; productRef = AA00000500000000 /* BuddyVoice */; };
 		AA00000900000000 /* BuddySession in Frameworks */ = {isa = PBXBuildFile; productRef = AA00000800000000 /* BuddySession */; };
 		AA00000C00000000 /* BuddySafariDOM in Frameworks */ = {isa = PBXBuildFile; productRef = AA00000B00000000 /* BuddySafariDOM */; };
 		AA00000F00000000 /* BuddyUIModel in Frameworks */ = {isa = PBXBuildFile; productRef = AA00000E00000000 /* BuddyUIModel */; };
+		AA00001200000000 /* BuddyLessons in Frameworks */ = {isa = PBXBuildFile; productRef = AA00001100000000 /* BuddyLessons */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,11 +33,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				74888AFB2FC2140F0073A698 /* KeyboardShortcuts in Frameworks */,
 				AA00000300000000 /* BuddyAccessibility in Frameworks */,
 				AA00000600000000 /* BuddyVoice in Frameworks */,
 				AA00000900000000 /* BuddySession in Frameworks */,
 				AA00000C00000000 /* BuddySafariDOM in Frameworks */,
 				AA00000F00000000 /* BuddyUIModel in Frameworks */,
+				AA00001200000000 /* BuddyLessons in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -83,6 +87,8 @@
 				AA00000800000000 /* BuddySession */,
 				AA00000B00000000 /* BuddySafariDOM */,
 				AA00000E00000000 /* BuddyUIModel */,
+				AA00001100000000 /* BuddyLessons */,
+				AA00001500000000 /* KeyboardShortcuts */,
 			);
 			productName = BuddyAka;
 			productReference = 740752252FBCC43800900211 /* BuddyAka.app */;
@@ -118,6 +124,8 @@
 				AA00000700000000 /* XCLocalSwiftPackageReference "Packages/BuddySession" */,
 				AA00000A00000000 /* XCLocalSwiftPackageReference "Packages/BuddySafariDOM" */,
 				AA00000D00000000 /* XCLocalSwiftPackageReference "Packages/BuddyUIModel" */,
+				AA00001000000000 /* XCLocalSwiftPackageReference "Packages/BuddyLessons" */,
+				AA00001400000000 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 740752262FBCC43800900211 /* Products */;
@@ -388,7 +396,22 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/BuddyUIModel;
 		};
+		AA00001000000000 /* XCLocalSwiftPackageReference "Packages/BuddyLessons" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/BuddyLessons;
+		};
 /* End XCLocalSwiftPackageReference section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		AA00001400000000 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sindresorhus/KeyboardShortcuts";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.2.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		AA00000200000000 /* BuddyAccessibility */ = {
@@ -410,6 +433,15 @@
 		AA00000E00000000 /* BuddyUIModel */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = BuddyUIModel;
+		};
+		AA00001100000000 /* BuddyLessons */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = BuddyLessons;
+		};
+		AA00001500000000 /* KeyboardShortcuts */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA00001400000000 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */;
+			productName = KeyboardShortcuts;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

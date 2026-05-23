@@ -5,6 +5,7 @@ struct BuddyMenu: View {
     @Environment(OnboardingState.self) private var onboarding
     @Environment(SessionCoordinator.self) private var session
     @Environment(SettingsRoute.self) private var settingsRoute
+    @Environment(BuddySettings.self) private var buddySettings
     @Environment(\.openSettings) private var openSettings
     @Environment(\.openWindow) private var openWindow
 
@@ -22,13 +23,11 @@ struct BuddyMenu: View {
         }
 
         Button(String(localized: "Open BuddyAka")) {
-            NSApp.activate()
-            openWindow(id: "main")
+            WindowPresenter.showMainWindow(using: openWindow)
         }
 
         Button(String(localized: "Settings…")) {
-            NSApp.activate()
-            openSettings()
+            WindowPresenter.showSettings(using: openSettings)
         }
         .keyboardShortcut(",", modifiers: .command)
 
@@ -41,21 +40,21 @@ struct BuddyMenu: View {
     }
 
     private func startSession() {
-        session.start(routing: SessionStartRouting(
-            onMissingPermissions: {
-                onboarding.blockForPermissions()
-                NSApp.activate()
-                openWindow(id: "main")
-            },
-            onMissingAPIKey: {
-                settingsRoute.selectedTab = .apiKey
-                NSApp.activate()
-                openSettings()
-            }
-        ))
+        session.start(
+            routing: SessionStartRouting(
+                onMissingPermissions: {
+                    onboarding.blockForPermissions()
+                    WindowPresenter.showMainWindow(using: openWindow)
+                },
+                onMissingAPIKey: {
+                    settingsRoute.selectedTab = .apiKey
+                    WindowPresenter.showSettings(using: openSettings)
+                }
+            ),
+            initialLessonID: buddySettings.selectedLessonID
+        )
         if session.lastError != nil {
-            NSApp.activate()
-            openWindow(id: "main")
+            WindowPresenter.showMainWindow(using: openWindow)
         }
     }
 }

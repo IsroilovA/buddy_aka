@@ -15,6 +15,21 @@ public final class AXSnapshotResolver: @unchecked Sendable, UISnapshotResolving 
         self.nodes = nodes
     }
 
+    /// Combine multiple resolvers from different scopes (app window, menu bar,
+    /// Dock) into one. Later resolvers' keys override earlier ones on collision —
+    /// callers must use disjoint id prefixes to avoid that.
+    public static func merging(_ resolvers: [AXSnapshotResolver]) -> AXSnapshotResolver {
+        var elements: [String: AXUIElement] = [:]
+        var frames: [String: CGRect] = [:]
+        var nodes: [String: UIElementNode] = [:]
+        for r in resolvers {
+            elements.merge(r.elements) { _, b in b }
+            frames.merge(r.frames) { _, b in b }
+            nodes.merge(r.nodes) { _, b in b }
+        }
+        return AXSnapshotResolver(elements: elements, frames: frames, nodes: nodes)
+    }
+
     public func element(for id: String) -> AXUIElement? { elements[id] }
     public func frame(for id: String) -> CGRect? { frames[id] }
     public var ids: [String] { Array(elements.keys) }

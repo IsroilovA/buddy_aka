@@ -1,5 +1,6 @@
 import AppKit
 import BuddyAccessibility
+import BuddyLessons
 import BuddySession
 import BuddyUIModel
 import BuddyVoice
@@ -12,11 +13,12 @@ enum SessionState: Equatable {
     case connecting
     case live
     // Buddy has pointed at an element; expecting the user to act or to time out.
-    // `expectedElementID` is nil in Step 6 (any focus/window change advances).
-    // Step 7's curated-flow walker will populate it from the matched flow step.
+    // `expectedElementID` is nil for free-form pointing; lesson walker populates it
+    // from the matched step.
     case guiding(expectedElementID: String?)
     case settling
     case touring(TourPhase)
+    case lesson
 }
 
 enum TourPhase: Equatable { case active, paused }
@@ -26,11 +28,13 @@ enum TourPhase: Equatable { case active, paused }
 final class SessionCoordinator {
     private(set) var state: SessionState = .idle
     private(set) var lastError: GeminiLiveError?
+    private(set) var activeLessonID: String?
 
     private let overlay: OverlayState
     private let permissions: PermissionsCoordinator
     private let targetTracker: TargetApplicationTracker
     private let buddySettings: BuddySettings
+    private let lessonStore: LessonStore
     private let log = Logger(subsystem: "dev.alisher.BuddyAka", category: "Session")
     @ObservationIgnored private let dispatcher: ToolDispatcher
 
@@ -46,40 +50,55 @@ final class SessionCoordinator {
     @ObservationIgnored private var timeoutTask: Task<Void, Never>?
     @ObservationIgnored private var mouseStream: MouseClickSignalSource?
     @ObservationIgnored private var mouseConsumerTask: Task<Void, Never>?
+    @ObservationIgnored private var scrollStream: ScrollSignalSource?
+    @ObservationIgnored private var scrollConsumerTask: Task<Void, Never>?
+    @ObservationIgnored private var scrollDebounceTask: Task<Void, Never>?
+    @ObservationIgnored private var targetVisibleAtLastCheck = true
+    @ObservationIgnored private var valueDebounceTask: Task<Void, Never>?
+    @ObservationIgnored private var lastEmittedValue: String?
     @ObservationIgnored private var settleTask: Task<Void, Never>?
     @ObservationIgnored private var guidance = GuidanceSignalController()
+    @ObservationIgnored private var idleTimeoutCount = 0
+    @ObservationIgnored private var guidedElementID: String?
+    @ObservationIgnored private var guidedAXElement: AXElementHandle?
+    private static let maxIdleTimeouts = 2
     @ObservationIgnored private var turnContext = ModelTurnContext()
     @ObservationIgnored private var tour = TourController()
     @ObservationIgnored private var tourResolver: UISnapshotResolving?
     @ObservationIgnored private var tourTickTask: Task<Void, Never>?
+    @ObservationIgnored private var lessonWalker: LessonWalker?
 
     // Pause between tour steps. With the half-duplex gate on, this is also the
     // window in which the user can speak to interrupt — keep it generous.
     private static let tourTickDelay: Duration = .milliseconds(2500)
 
-    // 25s gives the user time to actually read + act. The 5s placeholder we
-    // started with had the persona re-narrating before users finished hearing
-    // the first narration, which felt nagging.
-    private static let idleTimeout: Duration = .seconds(25)
+    private static let idleTimeout: Duration = .seconds(40)
+    private static let scrollDebounce: Duration = .milliseconds(500)
+    private static let valueDebounce: Duration = .milliseconds(800)
 
     init(
         overlay: OverlayState,
         permissions: PermissionsCoordinator,
         targetTracker: TargetApplicationTracker,
-        buddySettings: BuddySettings
+        buddySettings: BuddySettings,
+        lessonStore: LessonStore
     ) {
         self.overlay = overlay
         self.permissions = permissions
         self.targetTracker = targetTracker
         self.buddySettings = buddySettings
+        self.lessonStore = lessonStore
         self.dispatcher = ToolDispatcher(
             overlay: overlay,
             permissions: permissions,
-            targetPID: { targetTracker.currentPID }
+            targetPID: { targetTracker.currentPID },
+            lessonStore: lessonStore
         )
     }
 
-    func start() throws {
+    @ObservationIgnored private var pendingInitialLessonID: String?
+
+    func start(initialLessonID: String? = nil) throws {
         guard case .idle = state else { return }
 
         permissions.refresh()
@@ -98,26 +117,24 @@ final class SessionCoordinator {
             throw SessionStartFailure.missingAPIKey
         }
 
-        // Construct the AX event stream up-front so its permission probe runs
-        // before any state mutation. If it fails, no cleanup needed.
-        guard let pid = targetTracker.currentPID else {
-            throw GeminiLiveError.setupFailed(reason: String(localized: "Bring the app you want help with to the front, then start again."))
-        }
-        let stream: AXEventStream
-        do {
-            stream = try AXEventStream(initialPid: pid)
-        } catch AXEventStream.Error.accessibilityNotTrusted {
-            permissions.refresh()
-            throw SessionStartFailure.missingPermissions
-        } catch {
-            log.error("AXEventStream init failed: \(error.localizedDescription, privacy: .public)")
-            throw GeminiLiveError.setupFailed(reason: "AX observer init failed: \(error.localizedDescription)")
+        var stream: AXEventStream?
+        if let pid = targetTracker.currentPID {
+            do {
+                stream = try AXEventStream(initialPid: pid)
+            } catch AXEventStream.Error.accessibilityNotTrusted {
+                permissions.refresh()
+                throw SessionStartFailure.missingPermissions
+            } catch {
+                log.error("AXEventStream init failed: \(error.localizedDescription, privacy: .public)")
+                throw GeminiLiveError.setupFailed(reason: "AX observer init failed: \(error.localizedDescription)")
+            }
         }
 
         lastError = nil
         overlay.show()
         state = .connecting
         axStream = stream
+        pendingInitialLessonID = initialLessonID
 
         let audio = AudioEngine()
         self.audio = audio
@@ -150,10 +167,11 @@ final class SessionCoordinator {
             await self?.consumeEvents()
         }
 
-        axConsumerTask = Task { [weak self] in
-            guard let events = self?.axStream?.events else { return }
-            for await event in events {
-                self?.handle(axEvent: event)
+        if let stream {
+            axConsumerTask = Task { [weak self] in
+                for await event in stream.events {
+                    self?.handle(axEvent: event)
+                }
             }
         }
 
@@ -168,6 +186,14 @@ final class SessionCoordinator {
             }
         }
 
+        let scroll = ScrollSignalSource()
+        self.scrollStream = scroll
+        scrollConsumerTask = Task { [weak self] in
+            for await _ in scroll.events {
+                self?.handleScrollEvent()
+            }
+        }
+
         workspaceConsumerTask = Task { [weak self] in
             guard let changes = self?.targetTracker.targetChanges else { return }
             for await pid in changes {
@@ -177,21 +203,36 @@ final class SessionCoordinator {
                 }
                 self.dispatcher.clearSnapshot()
                 do {
-                    try self.axStream?.rebind(to: pid)
-                    self.log.debug("axStream rebound to pid=\(pid)")
+                    if let existing = self.axStream {
+                        try existing.rebind(to: pid)
+                        self.log.debug("axStream rebound to pid=\(pid)")
+                    } else {
+                        let fresh = try AXEventStream(initialPid: pid)
+                        self.axStream = fresh
+                        self.axConsumerTask = Task { [weak self] in
+                            for await event in fresh.events {
+                                self?.handle(axEvent: event)
+                            }
+                        }
+                        self.log.debug("axStream created on pid=\(pid)")
+                    }
                 } catch AXEventStream.Error.accessibilityNotTrusted {
                     // Permission revoked mid-session.
                     self.permissions.refresh()
                     self.teardownAfterError(.setupFailed(reason: String(localized: "Accessibility permission was revoked.")))
                     return
                 } catch {
-                    self.log.error("axStream rebind failed: \(error.localizedDescription, privacy: .public)")
+                    self.log.error("axStream rebind/create failed: \(error.localizedDescription, privacy: .public)")
                 }
+
+                // No lesson-side handling on app activation: the lesson walker
+                // advances purely on AX/snapshot evidence per step matchers.
             }
         }
 
+        let personaContext = PersonaContext(language: buddySettings.language)
         let sessionConfig = LiveSessionConfig(
-            systemInstruction: PersonaPrompt.v1(language: buddySettings.language),
+            systemInstruction: PersonaPrompt.compose(personaContext),
             tools: BuddyTools.all,
             voice: VoiceSelection(voiceName: buddySettings.voiceName),
             language: buddySettings.language
@@ -210,9 +251,9 @@ final class SessionCoordinator {
         }
     }
 
-    func start(routing: SessionStartRouting) {
+    func start(routing: SessionStartRouting, initialLessonID: String? = nil) {
         do {
-            try start()
+            try start(initialLessonID: initialLessonID)
         } catch SessionStartFailure.missingPermissions {
             routing.onMissingPermissions()
         } catch SessionStartFailure.missingAPIKey {
@@ -233,6 +274,7 @@ final class SessionCoordinator {
         client = nil
         Task { await c?.stop() }
         state = .idle
+        activeLessonID = nil
     }
 
     private func tearDown() {
@@ -252,18 +294,30 @@ final class SessionCoordinator {
         workspaceConsumerTask = nil
         timeoutTask?.cancel()
         timeoutTask = nil
+        pendingInitialLessonID = nil
         settleTask?.cancel()
         settleTask = nil
         mouseConsumerTask?.cancel()
         mouseConsumerTask = nil
         mouseStream?.stop()
         mouseStream = nil
+        scrollConsumerTask?.cancel()
+        scrollConsumerTask = nil
+        scrollDebounceTask?.cancel()
+        scrollDebounceTask = nil
+        scrollStream?.stop()
+        scrollStream = nil
+        targetVisibleAtLastCheck = true
+        valueDebounceTask?.cancel()
+        valueDebounceTask = nil
+        lastEmittedValue = nil
         axStream?.stop()
         axStream = nil
         tourTickTask?.cancel()
         tourTickTask = nil
         tour.stop()
         tourResolver = nil
+        lessonWalker = nil
         dispatcher.reset()
         guidance.reset()
         overlay.hide()
@@ -292,12 +346,14 @@ final class SessionCoordinator {
         switch event {
         case .connected:
             state = .live
-            // Kick the model with a synthetic "session started" turn so it
-            // introduces itself instead of sitting silent waiting for user
-            // speech. `clientContent` with `turnComplete: true` tells Live to
-            // treat this as a complete app-generated user turn.
             log.notice("session connected — sending session_started kickoff turn")
             emit(.sessionStarted)
+            if let lessonID = pendingInitialLessonID {
+                pendingInitialLessonID = nil
+                if let lesson = lessonStore.lesson(id: lessonID) {
+                    beginLesson(spec: .curated(lesson))
+                }
+            }
         case .audioChunk(let pcm):
             turnContext.phaseChanged(to: .speaking)
             audio?.play(pcm24kMono: pcm)
@@ -314,10 +370,11 @@ final class SessionCoordinator {
         case .turnComplete:
             if let payload = turnContext.drainOnTurnComplete() {
                 Task { [weak self] in
-                    await self?.client?.sendClientContentTurn(text: payload)
+                    await self?.client?.sendRealtimeText(payload)
                 }
             }
             if case .guiding = state { armIdleTimer() }
+            if case .lesson = state { armIdleTimer() }
             if case .touring(.active) = state { armTourTick() }
             log.debug("turn complete")
         case .toolCall(let call):
@@ -337,7 +394,14 @@ final class SessionCoordinator {
                 // receiveLoop will surface a real disconnect via .disconnected.
                 log.error("toolResponse send failed: \(error.localizedDescription, privacy: .public)")
             }
-            applyToolEffect(outcome.effect)
+            applyToolEffect(outcome.effect, call: call)
+        case .toolCallCancellation(let ids):
+            log.notice("Gemini toolCallCancellation ids=\(ids.joined(separator: ","), privacy: .public)")
+        case .sessionResumptionUpdate(let handle, let resumable):
+            if resumable, let handle, !handle.isEmpty {
+                log.debug("session resumption handle stored")
+                UserDefaults.standard.set(handle, forKey: "dev.alisher.BuddyAka.lastResumptionHandle")
+            }
         case .goAway(let reason):
             log.notice("Gemini goAway: \(reason ?? "unknown", privacy: .public)")
         case .disconnected(let err):
@@ -348,6 +412,7 @@ final class SessionCoordinator {
                 if state != .idle {
                     overlay.hide()
                     state = .idle
+                    activeLessonID = nil
                 }
             }
         }
@@ -357,25 +422,101 @@ final class SessionCoordinator {
 
     private func handle(mouseClick point: CGPoint) {
         apply(guidance.handleMouseClick(point))
+        // Lesson walker doesn't use mouse clicks directly today — its advance
+        // signals come from AX + snapshot value reads. Skip.
     }
 
     private func handle(axEvent: AXEvent) {
         apply(guidance.handleAXEvent(axEvent))
+
+        if case .valueChanged(let handle) = axEvent {
+            handleValueChanged(handle)
+        }
+
+        if var walker = lessonWalker {
+            let effects = walker.handle(axEvent: axEvent, currentSnapshot: nil)
+            lessonWalker = walker
+            applyLessonEffects(effects)
+        }
+    }
+
+    private func handleScrollEvent() {
+        guard case .guiding = state else { return }
+        guard let elementID = guidedElementID else { return }
+
+        scrollDebounceTask?.cancel()
+        scrollDebounceTask = Task { [weak self] in
+            try? await Task.sleep(for: Self.scrollDebounce)
+            guard let self, !Task.isCancelled else { return }
+            self.checkScrollVisibility(elementID: elementID)
+        }
+    }
+
+    private func checkScrollVisibility(elementID: String) {
+        guard case .guiding = state else { return }
+
+        let isVisible: Bool
+        if let axRect = dispatcher.liveFrame(for: elementID) {
+            let cocoaRect = ScreenGeometry.axRectToCocoa(axRect)
+            isVisible = NSScreen.screens.contains { $0.frame.intersects(cocoaRect) }
+        } else {
+            isVisible = false
+        }
+
+        if targetVisibleAtLastCheck && !isVisible {
+            targetVisibleAtLastCheck = false
+            emit(.targetScrolledOffScreen)
+        } else if !targetVisibleAtLastCheck && isVisible {
+            targetVisibleAtLastCheck = true
+        }
+    }
+
+    private func handleValueChanged(_ handle: AXElementHandle) {
+        guard case .guiding = state else { return }
+        guard let guided = guidedAXElement, handle == guided else { return }
+
+        valueDebounceTask?.cancel()
+        valueDebounceTask = Task { [weak self] in
+            try? await Task.sleep(for: Self.valueDebounce)
+            guard let self, !Task.isCancelled else { return }
+            self.checkValueChanged()
+        }
+    }
+
+    private func checkValueChanged() {
+        guard case .guiding = state else { return }
+        guard let guided = guidedAXElement else { return }
+
+        let currentValue = guided.displayValue
+        guard currentValue != lastEmittedValue else { return }
+        lastEmittedValue = currentValue
+        emit(.targetValueChanged)
     }
 
     private func enterGuiding(expectedElementID: String?) {
         guard let frame = overlay.haloTargetFrame, let expectedElementID else { return }
         guidance.startGuiding(elementID: expectedElementID, frame: frame)
         state = .guiding(expectedElementID: expectedElementID)
+        guidedElementID = expectedElementID
+        guidedAXElement = dispatcher.axElementHandle(for: expectedElementID)
+        idleTimeoutCount = 0
+        targetVisibleAtLastCheck = true
+        scrollDebounceTask?.cancel()
+        scrollDebounceTask = nil
+        valueDebounceTask?.cancel()
+        valueDebounceTask = nil
+        lastEmittedValue = nil
         armIdleTimer()
     }
 
     private func armIdleTimer() {
+        guard idleTimeoutCount < Self.maxIdleTimeouts else { return }
         timeoutTask?.cancel()
         timeoutTask = Task { [weak self] in
             try? await Task.sleep(for: Self.idleTimeout)
             guard let self else { return }
             guard !Task.isCancelled else { return }
+            self.idleTimeoutCount += 1
             self.apply(self.guidance.handleTimeout())
         }
     }
@@ -400,7 +541,17 @@ final class SessionCoordinator {
                 timeoutTask = nil
                 settleTask?.cancel()
                 settleTask = nil
-                state = .live
+                scrollDebounceTask?.cancel()
+                scrollDebounceTask = nil
+                valueDebounceTask?.cancel()
+                valueDebounceTask = nil
+                guidedElementID = nil
+                guidedAXElement = nil
+                if case .lesson = state {
+                    // Stay in lesson state; signal goes out the door.
+                } else {
+                    state = .live
+                }
             }
             emit(signal)
         }
@@ -421,7 +572,7 @@ final class SessionCoordinator {
 
     private func sendModelText(_ text: String) {
         Task { [weak self] in
-            await self?.client?.sendClientContentTurn(text: text)
+            await self?.client?.sendRealtimeText(text)
         }
     }
 
@@ -443,14 +594,90 @@ final class SessionCoordinator {
             .touringActive
         case .touring(.paused):
             .touringPaused
+        case .lesson:
+            .lessonActive
         case .idle, .connecting:
             .other
         }
     }
 
-    // MARK: - Tour mode
+    // MARK: - Lesson walker effects
 
-    private func applyToolEffect(_ effect: ToolEffect?) {
+    private func applyLessonEffects(_ effects: [LessonWalker.LessonEffect]) {
+        guard !effects.isEmpty else { return }
+        for effect in effects {
+            switch effect {
+            case .emitSignal(let signal):
+                emit(signal)
+            case .emitEvent(let event):
+                sendModelText(event.envelope())
+            case .pointAtMatch(let stepIndex):
+                pointAtLessonStep(stepIndex: stepIndex)
+            case .clearPointing:
+                overlay.setHaloTarget(nil)
+            case .requestSnapshot:
+                break
+            case .finishedWalk:
+                endLesson()
+            }
+        }
+    }
+
+    private func pointAtLessonStep(stepIndex: Int) {
+        _ = stepIndex
+    }
+
+    // MARK: - Lesson lifecycle
+
+    private func beginLesson(spec: LessonStartSpec) {
+        let lesson: Lesson
+        switch spec {
+        case .curated(let l):
+            lesson = l
+        case .adHoc(let topic):
+            lesson = Lesson(
+                id: "ad-hoc:\(UUID().uuidString)",
+                title: topic,
+                app: .bundleID(""),
+                steps: []
+            )
+        }
+        let walker = LessonWalker(lesson: lesson)
+        lessonWalker = walker
+        activeLessonID = lesson.id
+        state = .lesson
+        armIdleTimer()
+
+        let event = BuddyRuntimeEvent.lessonStarted(
+            id: lesson.id,
+            title: lesson.title,
+            intro: lesson.intro,
+            teachingStance: lesson.teachingStance,
+            steps: lesson.steps.map(\.userInstruction),
+            wrapup: lesson.wrapup,
+            suggestedNext: lesson.suggestedNext,
+            estimatedMinutes: lesson.estimatedMinutes
+        )
+        sendModelText(event.envelope())
+
+        if !lesson.isOpenLoop {
+            var w = lessonWalker!
+            let effects = w.didStart(currentSnapshot: nil)
+            lessonWalker = w
+            applyLessonEffects(effects)
+        }
+    }
+
+    private func endLesson() {
+        lessonWalker = nil
+        activeLessonID = nil
+        state = .live
+        overlay.setHaloTarget(nil)
+    }
+
+    // MARK: - Tool effects
+
+    private func applyToolEffect(_ effect: ToolEffect?, call: ToolCall) {
         guard let effect else { return }
         switch effect {
         case .pointed(let elementID):
@@ -461,7 +688,46 @@ final class SessionCoordinator {
             endTour(emit: nil, reason: "tour stopped")
         case .tourResumed:
             resumeTour()
+        case .lessonExited:
+            if var walker = lessonWalker {
+                let effects = walker.exit()
+                lessonWalker = walker
+                applyLessonEffects(effects)
+            }
+        case .pointingStopped:
+            overlay.setHaloTarget(nil)
+            if case .guiding = state {
+                state = lessonWalker != nil ? .lesson : .live
+            }
+            timeoutTask?.cancel()
+            timeoutTask = nil
+            settleTask?.cancel()
+            settleTask = nil
+            scrollDebounceTask?.cancel()
+            scrollDebounceTask = nil
+            valueDebounceTask?.cancel()
+            valueDebounceTask = nil
+            guidedElementID = nil
+            guidedAXElement = nil
+            guidance.reset()
+        case .lessonStartRequested(let spec):
+            beginLesson(spec: spec)
+        case .lessonStepAdvanceRequested(let target):
+            guard var walker = lessonWalker else { break }
+            let effects: [LessonWalker.LessonEffect]
+            switch target {
+            case .finish:
+                effects = walker.requestFinish()
+            case .step(let i):
+                effects = walker.advanceTo(stepIndex: i)
+            case .nextStep:
+                let next = (walker.currentStepIndex ?? 0) + 1
+                effects = walker.advanceTo(stepIndex: next)
+            }
+            lessonWalker = walker
+            applyLessonEffects(effects)
         }
+        _ = call
     }
 
     private func startTour(steps: [TourStep], resolver: UISnapshotResolving) {
@@ -530,7 +796,7 @@ final class SessionCoordinator {
         tour.stop()
         tourResolver = nil
         overlay.setHaloTarget(nil)
-        state = .live
+        state = lessonWalker != nil ? .lesson : .live
         if let payload {
             sendModelText(payload)
         }
@@ -543,9 +809,11 @@ final class SessionCoordinator {
         client = nil
         Task { await c?.stop() }
         state = .idle
+        activeLessonID = nil
         if case .keyRejected = error {
             try? GeminiAPIKey.clear()
         }
         lastError = error
     }
 }
+
